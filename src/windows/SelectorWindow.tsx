@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Stage, Layer, Rect, Image as KonvaImage } from "react-konva";
 import type Konva from "konva";
 import useImage from "use-image";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { captureScreen, hideCurrentWindow, showEditorWindow } from "../ipc/bridge";
 import type { Selection } from "../types/annotation";
 
@@ -12,17 +13,37 @@ export default function SelectorWindow() {
   const [selection, setSelection] = useState<Selection | null>(null);
   const [image] = useImage(bg);
 
+  // Recapture the screen whenever the selector becomes visible/focused, so a
+  // stale background is never shown after a re-open via F1.
   useEffect(() => {
     let mounted = true;
-    (async () => {
+    async function recapture() {
       const dataUrl = await captureScreen();
-      if (mounted) setBg(dataUrl);
-    })();
+      if (mounted) {
+        setBg(dataUrl);
+        setSelection(null);
+        startRef.current = null;
+      }
+    }
+    recapture();
+
     const onResize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") hideCurrentWindow();
+    };
     window.addEventListener("resize", onResize);
+    window.addEventListener("keydown", onKey);
+
+    const win = getCurrentWebviewWindow();
+    const unlistenFocus = win.onFocusChanged(({ payload: focused }) => {
+      if (focused) recapture();
+    });
+
     return () => {
       mounted = false;
       window.removeEventListener("resize", onResize);
+      window.removeEventListener("keydown", onKey);
+      unlistenFocus.then((fn) => fn());
     };
   }, []);
 
