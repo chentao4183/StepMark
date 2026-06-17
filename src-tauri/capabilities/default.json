@@ -1,10 +1,20 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Capability for the main window",
-  "windows": ["main"],
+  "description": "Capabilities for all SnapNote windows (main, selector, editor)",
+  "windows": ["main", "selector", "editor"],
   "permissions": [
     "core:default",
-    "opener:default"
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-close",
+    "core:window:allow-set-focus",
+    "core:event:default",
+    "core:webview:allow-internal-toggle-devtools",
+    "opener:default",
+    "clipboard-manager:allow-write-image",
+    "dialog:allow-save",
+    "global-shortcut:allow-register",
+    "global-shortcut:allow-unregister"
   ]
 }

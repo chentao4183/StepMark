@@ -39,6 +39,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             greet,
             commands::screenshot::capture_screen,
+            commands::clipboard::copy_image_to_clipboard,
+            commands::save::save_image,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
