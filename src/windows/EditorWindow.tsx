@@ -4,7 +4,7 @@ import { useEditorStore } from "../store/editorStore";
 import EditorStage from "../canvas/EditorStage";
 import Toolbar from "../components/Toolbar";
 import TextInputOverlay from "../components/TextInputOverlay";
-import { useSmartAnnotationTool } from "../tools/useSmartAnnotationTool";
+import { useActiveTool } from "../tools";
 
 interface LoadPayload {
   x: number;
@@ -16,7 +16,7 @@ interface LoadPayload {
 
 export default function EditorWindow() {
   const init = useEditorStore((s) => s.init);
-  const smart = useSmartAnnotationTool();
+  const active = useActiveTool();
 
   useEffect(() => {
     const unlisten = listen<LoadPayload>("editor-load", (event) => {
@@ -42,13 +42,22 @@ export default function EditorWindow() {
     <div style={{ position: "relative", width: "100vw", height: "100vh", background: "#1a1a2e" }}>
       <EditorStage />
       <Toolbar />
-      {smart.phase === "entering-text" && smart.textPos && (
+      {active.kind === "smart" && active.smart.isEnteringText && active.smart.textPos && (
         <TextInputOverlay
-          x={smart.textPos.x}
-          y={smart.textPos.y - 28}
+          x={active.smart.textPos.x}
+          y={active.smart.textPos.y - 28}
           initial=""
-          onSubmit={smart.submitText}
-          onCancel={smart.cancelText}
+          onSubmit={active.smart.submitText}
+          onCancel={active.smart.cancelText}
+        />
+      )}
+      {active.kind === "text" && active.text.textPos && (
+        <TextInputOverlay
+          x={active.text.textPos.x}
+          y={active.text.textPos.y - 28}
+          initial=""
+          onSubmit={active.text.submit}
+          onCancel={active.text.cancel}
         />
       )}
     </div>

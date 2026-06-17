@@ -1,113 +1,124 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import type Konva from "konva";
 import { useEditorStore } from "../store/editorStore";
+import { useToolState } from "../store/toolState";
 import { nearestCorner } from "../geometry/corners";
-import { DEFAULT_STYLE, type Annotation, type Corner, type Rect } from "../types/annotation";
+import { DEFAULT_STYLE, type Annotation, type Corner } from "../types/annotation";
 
 type Phase = "idle" | "dragging-rect" | "placing-arrow" | "entering-text";
 
 /**
- * Drives the smart annotation 5-step flow:
- *   1. idle            - waiting for mousedown
- *   2. dragging-rect   - mouse held down, drawing the rect
- *   3. placing-arrow   - rect committed, arrow end follows the mouse
- *   4. (click)         - pin the arrow end; corner is finalized relative to the click
- *   5. entering-text   - label input is open; on submit the annotation is committed
+ * Smart annotation 5-step flow backed by the shared tool-state store so that
+ * EditorStage (handlers) and EditorWindow (text overlay) observe one machine.
  *
- * The start corner is finalized at the click in `placing-arrow`, picking the rect
- * corner nearest to where the label ends up (matches the spec's intent).
+ *   1. idle            - waiting for mousedown
+ *   2. dragging-rect   - drawing the rect
+ *   3. placing-arrow   - rect committed, arrow end follows the mouse
+ *   4. click           - pin the arrow end; corner finalized to nearest
+ *   5. entering-text   - label input open; on submit the annotation commits
  */
 export function useSmartAnnotationTool() {
   const addAnnotation = useEditorStore((s) => s.addAnnotation);
-  const [phase, setPhase] = useState<Phase>("idle");
+  const ts = useToolState();
+  const phaseRef = useRef<Phase>("idle");
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
-  const [previewRect, setPreviewRect] = useState<Rect | null>(null);
-  const [rect, setRect] = useState<Rect | null>(null);
-  const [startCorner, setStartCorner] = useState<Corner>("tr");
-  const [arrowEnd, setArrowEnd] = useState<{ x: number; y: number } | null>(null);
-  const [textPos, setTextPos] = useState<{ x: number; y: number } | null>(null);
+  const rectRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  const startCornerRef = useRef<Corner>("tr");
+  const arrowEndRef = useRef<{ x: number; y: number } | null>(null);
+
+  // Keep refs in sync with phase transitions.
+  function setPhase(p: Phase) {
+    phaseRef.current = p;
+  }
 
   function pos(e: Konva.KonvaEventObject<MouseEvent>) {
     return e.target.getStage()!.getPointerPosition()!;
   }
 
-  function onMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
-    if (phase !== "idle") return;
-    const p = pos(e);
-    dragStartRef.current = p;
-    setPreviewRect({ x: p.x, y: p.y, width: 0, height: 0 });
-    setPhase("dragging-rect");
-  }
-
-  function onMouseMove(e: Konva.KonvaEventObject<MouseEvent>) {
-    const p = pos(e);
-    if (phase === "dragging-rect" && dragStartRef.current) {
-      const s = dragStartRef.current;
-      setPreviewRect({
-        x: Math.min(s.x, p.x),
-        y: Math.min(s.y, p.y),
-        width: Math.abs(p.x - s.x),
-        height: Math.abs(p.y - s.y),
-      });
-    } else if (phase === "placing-arrow") {
-      setArrowEnd(p);
-    }
-  }
-
-  function onMouseUp() {
-    if (phase === "dragging-rect" && previewRect && previewRect.width > 5 && previewRect.height > 5) {
-      setRect(previewRect);
-      setStartCorner("tr"); // refined at the click below
-      setPreviewRect(null);
-      setPhase("placing-arrow");
-    }
-  }
-
-  function onClick(e: Konva.KonvaEventObject<MouseEvent>) {
-    if (phase !== "placing-arrow") return;
-    const p = pos(e);
-    const corner: Corner = rect ? nearestCorner(rect, p) : "tr";
-    setStartCorner(corner);
-    setArrowEnd(p);
-    setTextPos(p);
-    setPhase("entering-text");
-  }
+  const handlers = {
+    onMouseDown: (e: Konva.KonvaEventObject<MouseEvent>) => {
+      if (phaseRef.current !== "idle") return;
+      const p = pos(e);
+      dragStartRef.current = p;
+      ts.setSmart({ previewRect: { x: p.x, y: p.y, width: 0, height: 0 } });
+      setPhase("dragging-rect");
+    },
+    onMouseMove: (e: Konva.KonvaEventObject<MouseEvent>) => {
+      const p = pos(e);
+      if (phaseRef.current === "dragging-rect" && dragStartRef.current) {
+        const s = dragStartRef.current;
+        ts.setSmart({
+          previewRect: {
+            x: Math.min(s.x, p.x),
+            y: Math.min(s.y, p.y),
+            width: Math.abs(p.x - s.x),
+            height: Math.abs(p.y - s.y),
+          },
+        });
+      } else if (phaseRef.current === "placing-arrow") {
+        arrowEndRef.current = p;
+        ts.setSmart({ arrowEnd: p });
+      }
+    },
+    onMouseUp: () => {
+      if (phaseRef.current === "dragging-rect") {
+        const r = ts.previewRect;
+        if (r && r.width > 5 && r.height > 5) {
+          rectRef.current = r;
+          startCornerRef.current = "tr";
+          ts.setSmart({ previewRect: null, rect: r, startCorner: "tr" });
+          setPhase("placing-arrow");
+        } else {
+          ts.resetSmart();
+          setPhase("idle");
+        }
+      }
+    },
+    onClick: (e: Konva.KonvaEventObject<MouseEvent>) => {
+      if (phaseRef.current !== "placing-arrow") return;
+      const p = pos(e);
+      const corner: Corner = rectRef.current ? nearestCorner(rectRef.current, p) : "tr";
+      startCornerRef.current = corner;
+      arrowEndRef.current = p;
+      ts.setSmart({ startCorner: corner, arrowEnd: p, textPos: p });
+      setPhase("entering-text");
+    },
+  };
 
   function submitText(text: string) {
-    if (!rect || !arrowEnd) {
-      reset();
-      return;
+    if (rectRef.current && arrowEndRef.current) {
+      const a: Annotation = {
+        id: crypto.randomUUID(),
+        type: "smart",
+        rect: rectRef.current,
+        note: text,
+        arrow: { startCorner: startCornerRef.current, endX: arrowEndRef.current.x, endY: arrowEndRef.current.y },
+        style: { ...DEFAULT_STYLE },
+      };
+      addAnnotation(a);
     }
-    const a: Annotation = {
-      id: crypto.randomUUID(),
-      type: "smart",
-      rect,
-      note: text,
-      arrow: { startCorner, endX: arrowEnd.x, endY: arrowEnd.y },
-      style: { ...DEFAULT_STYLE },
-    };
-    addAnnotation(a);
     reset();
   }
 
   function reset() {
     setPhase("idle");
     dragStartRef.current = null;
-    setPreviewRect(null);
-    setRect(null);
-    setStartCorner("tr");
-    setArrowEnd(null);
-    setTextPos(null);
+    rectRef.current = null;
+    startCornerRef.current = "tr";
+    arrowEndRef.current = null;
+    ts.resetSmart();
   }
 
   return {
-    phase,
-    previewRect,
-    rect,
-    startCorner,
-    arrowEnd,
-    textPos,
-    handlers: { onMouseDown, onMouseMove, onMouseUp, onClick },
+    // Re-expose for renderers; phase derived from the stored state.
+    phase: phaseRef.current,
+    previewRect: ts.previewRect,
+    rect: ts.rect,
+    startCorner: ts.startCorner,
+    arrowEnd: ts.arrowEnd,
+    textPos: ts.textPos,
+    isEnteringText: ts.textPos !== null,
+    handlers,
     submitText,
     cancelText: reset,
   };

@@ -2,54 +2,94 @@ import { Stage, Layer, Image as KonvaImage, Rect, Arrow } from "react-konva";
 import useImage from "use-image";
 import { useEditorStore } from "../store/editorStore";
 import AnnotationLayer from "./layers/AnnotationLayer";
-import { useSmartAnnotationTool } from "../tools/useSmartAnnotationTool";
+import { useActiveTool } from "../tools";
 import { cornerPoint } from "../geometry/corners";
 
 export default function EditorStage() {
   const bg = useEditorStore((s) => s.backgroundImage);
   const rect = useEditorStore((s) => s.selectionRect);
-  const tool = useEditorStore((s) => s.currentTool);
   const [image] = useImage(bg);
-  const smart = useSmartAnnotationTool();
+  const active = useActiveTool();
 
-  const activeHandlers = tool === "smart" ? smart.handlers : {};
+  // Attach only the active tool's handlers (discriminated by `active.kind`).
+  const handlers =
+    active.kind === "smart"
+      ? active.smart.handlers
+      : active.kind === "rect"
+        ? active.rect.handlers
+        : active.kind === "arrow"
+          ? active.arrow.handlers
+          : active.kind === "mosaic"
+            ? active.mosaic.handlers
+            : active.kind === "text"
+              ? active.text.handlers
+              : {};
 
   return (
-    <Stage width={window.innerWidth} height={window.innerHeight} {...activeHandlers}>
+    <Stage width={window.innerWidth} height={window.innerHeight} {...handlers}>
       <Layer>
         <KonvaImage image={image} x={rect.x} y={rect.y} width={rect.width} height={rect.height} />
       </Layer>
       <AnnotationLayer />
-      {/* Preview layer for the in-progress smart annotation */}
-      {tool === "smart" && (
-        <Layer listening={false}>
-          {smart.previewRect && (
-            <Rect
-              x={smart.previewRect.x}
-              y={smart.previewRect.y}
-              width={smart.previewRect.width}
-              height={smart.previewRect.height}
-              stroke="#ff4757"
-              strokeWidth={3}
-            />
-          )}
-          {smart.rect && smart.arrowEnd && (
-            <Arrow
-              points={[
-                cornerPoint(smart.rect, smart.startCorner).x,
-                cornerPoint(smart.rect, smart.startCorner).y,
-                smart.arrowEnd.x,
-                smart.arrowEnd.y,
-              ]}
-              stroke="#ff4757"
-              strokeWidth={3}
-              fill="#ff4757"
-              pointerLength={10}
-              pointerWidth={10}
-            />
-          )}
-        </Layer>
-      )}
+      {/* Preview layer for in-progress annotations */}
+      <Layer listening={false}>
+        {active.kind === "smart" && active.smart.previewRect && (
+          <Rect
+            x={active.smart.previewRect.x}
+            y={active.smart.previewRect.y}
+            width={active.smart.previewRect.width}
+            height={active.smart.previewRect.height}
+            stroke="#ff4757"
+            strokeWidth={3}
+          />
+        )}
+        {active.kind === "smart" && active.smart.rect && active.smart.arrowEnd && (
+          <Arrow
+            points={[
+              cornerPoint(active.smart.rect, active.smart.startCorner).x,
+              cornerPoint(active.smart.rect, active.smart.startCorner).y,
+              active.smart.arrowEnd.x,
+              active.smart.arrowEnd.y,
+            ]}
+            stroke="#ff4757"
+            strokeWidth={3}
+            fill="#ff4757"
+            pointerLength={10}
+            pointerWidth={10}
+          />
+        )}
+        {active.kind === "rect" && active.rect.preview && (
+          <Rect
+            x={active.rect.preview.x}
+            y={active.rect.preview.y}
+            width={active.rect.preview.width}
+            height={active.rect.preview.height}
+            stroke="#ff4757"
+            strokeWidth={3}
+          />
+        )}
+        {active.kind === "mosaic" && active.mosaic.preview && (
+          <Rect
+            x={active.mosaic.preview.x}
+            y={active.mosaic.preview.y}
+            width={active.mosaic.preview.width}
+            height={active.mosaic.preview.height}
+            stroke="#7bed9f"
+            strokeWidth={2}
+            dash={[5, 5]}
+          />
+        )}
+        {active.kind === "arrow" && active.arrow.preview && (
+          <Arrow
+            points={[active.arrow.preview.sx, active.arrow.preview.sy, active.arrow.preview.ex, active.arrow.preview.ey]}
+            stroke="#ff4757"
+            strokeWidth={3}
+            fill="#ff4757"
+            pointerLength={10}
+            pointerWidth={10}
+          />
+        )}
+      </Layer>
     </Stage>
   );
 }
