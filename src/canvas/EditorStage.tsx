@@ -1,6 +1,7 @@
 import { Stage, Layer, Image as KonvaImage } from "react-konva";
 import useImage from "use-image";
 import { useEditorStore } from "../store/editorStore";
+import AnnotationLayer from "./layers/AnnotationLayer";
 
 export default function EditorStage() {
   const bg = useEditorStore((s) => s.backgroundImage);
@@ -12,6 +13,7 @@ export default function EditorStage() {
       <Layer>
         <KonvaImage image={image} x={rect.x} y={rect.y} width={rect.width} height={rect.height} />
       </Layer>
+      <AnnotationLayer />
     </Stage>
   );
 }
