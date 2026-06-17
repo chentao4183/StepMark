@@ -29,4 +29,14 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  // 4. multi-page build: main / selector / editor windows each get their own entry
+  build: {
+    rollupOptions: {
+      input: {
+        main: "index.html",
+        selector: "selector.html",
+        editor: "editor.html",
+      },
+    },
+  },
 }));
