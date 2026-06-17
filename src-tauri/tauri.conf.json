@@ -17,6 +17,33 @@
         "width": 800,
         "height": 600,
         "visible": false
+      },
+      {
+        "label": "selector",
+        "title": "SnapNote",
+        "url": "selector.html",
+        "width": 1920,
+        "height": 1080,
+        "decorations": false,
+        "fullscreen": true,
+        "alwaysOnTop": true,
+        "resizable": false,
+        "visible": false,
+        "transparent": true,
+        "skipTaskbar": true
+      },
+      {
+        "label": "editor",
+        "title": "SnapNote Editor",
+        "url": "editor.html",
+        "width": 1920,
+        "height": 1080,
+        "decorations": false,
+        "fullscreen": true,
+        "alwaysOnTop": false,
+        "resizable": false,
+        "visible": false,
+        "skipTaskbar": true
       }
     ],
     "security": {
