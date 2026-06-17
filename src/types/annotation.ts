@@ -33,6 +33,10 @@ export interface ArrowData {
   startY?: number;
   endX: number;
   endY: number;
+  // For 'smart': where the text label sits (offset past the arrow tip). Falls
+  // back to (endX, endY) when unset for backward compatibility.
+  labelX?: number;
+  labelY?: number;
 }
 
 export interface Annotation {

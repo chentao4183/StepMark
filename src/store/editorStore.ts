@@ -33,7 +33,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   selectionRect: { x: 0, y: 0, width: 0, height: 0 },
   annotations: [],
   selectedId: null,
-  currentTool: "select",
+  currentTool: "smart",
   history: [],
   redoStack: [],
 

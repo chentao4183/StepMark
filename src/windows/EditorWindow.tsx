@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { useEditorStore } from "../store/editorStore";
-import EditorStage from "../canvas/EditorStage";
-import Toolbar from "../components/Toolbar";
-import TextInputOverlay from "../components/TextInputOverlay";
-import { useActiveTool } from "../tools";
-import { useSelectionTool } from "../tools/useSelectionTool";
-import { useEditorShortcuts } from "../tools/useEditorShortcuts";
-import { hideCurrentWindow } from "../ipc/bridge";
-import { exportToFile } from "../canvas/exportCanvas";
+import EditorView from "../components/EditorView";
 
 interface LoadPayload {
   x: number;
@@ -18,76 +11,36 @@ interface LoadPayload {
   fullBase64: string;
 }
 
+/**
+ * Standalone editor window (loaded via editor.html). Retained for compatibility,
+ * but the primary capture flow now edits in place inside the selector window.
+ */
 export default function EditorWindow() {
   const init = useEditorStore((s) => s.init);
-  const active = useActiveTool();
-  const selection = useSelectionTool();
+  const setTool = useEditorStore((s) => s.setTool);
   const [loaded, setLoaded] = useState(false);
-  useEditorShortcuts({
-    onExit: () => hideCurrentWindow(),
-    onSave: () => {
-      void exportToFile("png");
-    },
-  });
 
   useEffect(() => {
     const unlisten = listen<LoadPayload>("editor-load", (event) => {
       const p = event.payload;
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = p.width;
-        canvas.height = p.height;
-        const ctx = canvas.getContext("2d")!;
-        ctx.drawImage(img, p.x, p.y, p.width, p.height, 0, 0, p.width, p.height);
-        const cropped = canvas.toDataURL("image/png");
-        init(cropped, { x: 0, y: 0, width: p.width, height: p.height });
-        setLoaded(true);
-      };
-      img.src = p.fullBase64;
+      // Store the FULL screenshot + the selection rect (screen coords). The
+      // background is drawn at full-window size; selectionRect only drives export.
+      init(p.fullBase64, { x: p.x, y: p.y, width: p.width, height: p.height });
+      setTool("smart");
+      setLoaded(true);
     });
     return () => {
       unlisten.then((fn) => fn());
     };
-  }, [init]);
+  }, [init, setTool]);
 
-  // Don't mount the Konva stage until the cropped background is ready — rendering
-  // <KonvaImage image={undefined}> before that would warn/throw.
   if (!loaded) {
     return <div style={{ width: "100vw", height: "100vh", background: "#1a1a2e" }} />;
   }
 
   return (
     <div style={{ position: "relative", width: "100vw", height: "100vh", background: "#1a1a2e" }}>
-      <EditorStage onEditText={selection.beginEditText} />
-      <Toolbar />
-      {active.kind === "smart" && active.smart.isEnteringText && active.smart.textPos && (
-        <TextInputOverlay
-          x={active.smart.textPos.x}
-          y={active.smart.textPos.y - 28}
-          initial=""
-          onSubmit={active.smart.submitText}
-          onCancel={active.smart.cancelText}
-        />
-      )}
-      {active.kind === "text" && active.text.textPos && (
-        <TextInputOverlay
-          x={active.text.textPos.x}
-          y={active.text.textPos.y - 28}
-          initial=""
-          onSubmit={active.text.submit}
-          onCancel={active.text.cancel}
-        />
-      )}
-      {selection.editing && (
-        <TextInputOverlay
-          x={selection.editing.x}
-          y={selection.editing.y - 28}
-          initial={selection.editing.initial}
-          onSubmit={selection.commitEditText}
-          onCancel={selection.cancelEdit}
-        />
-      )}
+      <EditorView />
     </div>
   );
 }

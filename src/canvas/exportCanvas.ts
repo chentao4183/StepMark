@@ -1,10 +1,10 @@
 import type Konva from "konva";
 import { copyImageToClipboard, saveImage } from "../ipc/bridge";
+import { useEditorStore } from "../store/editorStore";
 
 /**
  * The reference to the editor's Konva Stage is registered here (set from
- * EditorStage via a ref) so the toolbar can rasterize the whole composed scene
- * — background + annotations — with one `stage.toDataURL()` call.
+ * EditorStage via a ref) so the toolbar can rasterize the composed scene.
  */
 let stageRef: Konva.Stage | null = null;
 
@@ -12,11 +12,24 @@ export function setEditorStage(stage: Konva.Stage | null) {
   stageRef = stage;
 }
 
+/**
+ * Produce a data URL for just the selected region (background + annotations),
+ * not the whole window-sized stage. Without this crop, toDataURL captures the
+ * fullscreen stage and the exported image is mostly empty/transparent.
+ */
 async function composeDataUrl(): Promise<string> {
   if (!stageRef) {
     throw new Error("editor stage not ready");
   }
-  return stageRef.toDataURL({ pixelRatio: window.devicePixelRatio || 1, mimeType: "image/png" });
+  const { x, y, width, height } = useEditorStore.getState().selectionRect;
+  return stageRef.toDataURL({
+    x,
+    y,
+    width,
+    height,
+    pixelRatio: window.devicePixelRatio || 1,
+    mimeType: "image/png",
+  });
 }
 
 export async function exportToClipboard(): Promise<void> {

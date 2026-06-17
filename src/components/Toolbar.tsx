@@ -30,6 +30,10 @@ export default function Toolbar() {
     setBusy(true);
     try {
       await fn();
+    } catch (err) {
+      // Surface failures instead of swallowing them — the old behavior left the
+      // user with no idea why copy/save "didn't work".
+      alert(`操作失败：${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setBusy(false);
     }

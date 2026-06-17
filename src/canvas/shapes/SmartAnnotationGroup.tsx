@@ -13,8 +13,9 @@ interface Props {
 
 /**
  * The smart annotation is a composite: rect + arrow (from the rect's chosen
- * corner to a label anchor) + label. When selectable, dragging the rect
- * translates the whole annotation; double-clicking opens a text editor.
+ * corner to a label anchor) + optional label. When selectable, the rect itself
+ * is draggable and moves the whole annotation (rect + arrow end + label);
+ * double-click opens a text editor for the note.
  */
 export default function SmartAnnotationGroup({ a, selectable = false, onEditText }: Props) {
   const selectedId = useEditorStore((s) => s.selectedId);
@@ -37,7 +38,13 @@ export default function SmartAnnotationGroup({ a, selectable = false, onEditText
         }
       }}
     >
-      <RectShape a={a} selectable={selectable} />
+      {/* The rect doubles as the selection + drag handle for the whole group. */}
+      {a.rect && (
+        <RectShape
+          a={a}
+          selectable={selectable}
+        />
+      )}
       {a.arrow && start && (
         <Arrow
           points={[start.x, start.y, a.arrow.endX, a.arrow.endY]}
@@ -50,25 +57,38 @@ export default function SmartAnnotationGroup({ a, selectable = false, onEditText
         />
       )}
       <TextLabelShape a={a} />
-      {/* When selected, dragging the rect moves the whole annotation. */}
+
+      {/* Move-whole-annotation drag: an invisible hit rect over the box, only
+          when selected. The per-shape RectShape already handles its own drag,
+          but for the smart group we want drag to move rect + arrow + label
+          together, so we override with this dedicated handle. */}
       {isSelected && a.rect && (
-        <Group
+        <Rect
+          x={a.rect.x}
+          y={a.rect.y}
+          width={a.rect.width}
+          height={a.rect.height}
+          fill="rgba(0,0,0,0.001)"
           draggable
           onDragEnd={(e) => {
             const dx = e.target.x();
             const dy = e.target.y();
             e.target.x(0);
             e.target.y(0);
-            const newRect = { x: a.rect!.x + dx, y: a.rect!.y + dy, width: a.rect!.width, height: a.rect!.height };
             update(a.id, {
-              rect: newRect,
-              arrow: a.arrow ? { ...a.arrow, endX: a.arrow.endX + dx, endY: a.arrow.endY + dy } : a.arrow,
+              rect: { x: a.rect!.x + dx, y: a.rect!.y + dy, width: a.rect!.width, height: a.rect!.height },
+              arrow: a.arrow
+                ? {
+                    ...a.arrow,
+                    endX: a.arrow.endX + dx,
+                    endY: a.arrow.endY + dy,
+                    labelX: (a.arrow.labelX ?? a.arrow.endX) + dx,
+                    labelY: (a.arrow.labelY ?? a.arrow.endY) + dy,
+                  }
+                : a.arrow,
             });
           }}
-        >
-          {/* invisible-but-hittable area over the rect */}
-          <Rect x={a.rect.x} y={a.rect.y} width={a.rect.width} height={a.rect.height} fill="rgba(0,0,0,0.001)" />
-        </Group>
+        />
       )}
     </Group>
   );

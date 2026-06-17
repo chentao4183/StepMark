@@ -6,18 +6,22 @@ import type { Annotation } from "../../types/annotation";
 
 const BLOCK_SIZE = 10;
 
+/**
+ * Pixelates the region of the background covered by the annotation rect.
+ * The background is the full screenshot drawn at (0,0) window-size, so the
+ * source region is sampled directly at the rect's screen coords.
+ */
 export default function MosaicShape({ a }: { a: Annotation }) {
   const bg = useEditorStore((s) => s.backgroundImage);
-  const bgRect = useEditorStore((s) => s.selectionRect);
   const [bgImg] = useImage(bg);
   const [mosaicCanvas, setMosaicCanvas] = useState<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     if (!bgImg || !a.rect) return;
+    const sx = a.rect.x;
+    const sy = a.rect.y;
     const sw = a.rect.width;
     const sh = a.rect.height;
-    const sx = a.rect.x - bgRect.x;
-    const sy = a.rect.y - bgRect.y;
 
     // Downscale the source region, then upscale with smoothing off = pixelation.
     const smallW = Math.max(1, sw / BLOCK_SIZE);
@@ -37,7 +41,7 @@ export default function MosaicShape({ a }: { a: Annotation }) {
     tctx.imageSmoothingEnabled = false;
     tctx.drawImage(c, 0, 0, smallW, smallH, 0, 0, sw, sh);
     setMosaicCanvas(tmp);
-  }, [bgImg, a.rect, bgRect.x, bgRect.y]);
+  }, [bgImg, a.rect]);
 
   if (!a.rect || !mosaicCanvas) return null;
   return <KonvaImage image={mosaicCanvas} x={a.rect.x} y={a.rect.y} listening={false} />;

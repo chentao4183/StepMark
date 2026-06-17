@@ -15,9 +15,8 @@ interface Props {
 
 export default function EditorStage({ onEditText }: Props) {
   const bg = useEditorStore((s) => s.backgroundImage);
-  const rect = useEditorStore((s) => s.selectionRect);
-  const [image] = useImage(bg);
   const active = useActiveTool();
+  const [image] = useImage(bg);
   const stageRef = useRef<Konva.Stage>(null);
 
   // Attach only the active tool's handlers (discriminated by `active.kind`).
@@ -45,7 +44,10 @@ export default function EditorStage({ onEditText }: Props) {
       }}
     >
       <Layer>
-        <KonvaImage image={image} x={rect.x} y={rect.y} width={rect.width} height={rect.height} />
+        {/* Background is the full screenshot, drawn at full window size so tools
+            operate in screen space (in-place editing). selectionRect now only
+            drives the export crop, not the image transform. */}
+        <KonvaImage image={image} x={0} y={0} width={window.innerWidth} height={window.innerHeight} />
       </Layer>
       <AnnotationLayer selectable={active.kind === "select"} onEditText={onEditText} />
       {/* Preview layer for in-progress annotations */}
