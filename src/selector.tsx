@@ -1,13 +1,10 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
 import "./global.css";
-
-function SelectorApp() {
-  return <div style={{ width: "100vw", height: "100vh", background: "rgba(0,0,0,0.3)" }}>Selector</div>;
-}
+import SelectorWindow from "./windows/SelectorWindow";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <SelectorApp />
+    <SelectorWindow />
   </React.StrictMode>
 );
