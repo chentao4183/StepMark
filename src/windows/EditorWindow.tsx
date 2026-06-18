@@ -9,6 +9,8 @@ interface LoadPayload {
   width: number;
   height: number;
   fullBase64: string;
+  sourceWidth?: number;
+  sourceHeight?: number;
 }
 
 /**
@@ -23,9 +25,10 @@ export default function EditorWindow() {
   useEffect(() => {
     const unlisten = listen<LoadPayload>("editor-load", (event) => {
       const p = event.payload;
-      // Store the FULL screenshot + the selection rect (screen coords). The
-      // background is drawn at full-window size; selectionRect only drives export.
-      init(p.fullBase64, { x: p.x, y: p.y, width: p.width, height: p.height });
+      init(p.fullBase64, { x: p.x, y: p.y, width: p.width, height: p.height }, {
+        width: p.sourceWidth ?? window.innerWidth,
+        height: p.sourceHeight ?? window.innerHeight,
+      });
       setTool("smart");
       setLoaded(true);
     });

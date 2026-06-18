@@ -25,7 +25,7 @@ interface Props {
 export default function Toolbar({ onClose }: Props) {
   const currentTool = useEditorStore((s) => s.currentTool);
   const setTool = useEditorStore((s) => s.setTool);
-  const selectionRect = useEditorStore((s) => s.selectionRect);
+  const cropRegion = useEditorStore((s) => s.cropRegion);
   const undo = useEditorStore((s) => s.undo);
   const redo = useEditorStore((s) => s.redo);
   const [busy, setBusy] = useState(false);
@@ -33,12 +33,12 @@ export default function Toolbar({ onClose }: Props) {
   const toolbarWidth = 430;
   const toolbarHeight = 50;
   const gap = 8;
-  const topBelow = selectionRect.y + selectionRect.height + gap;
+  const topBelow = cropRegion.y + cropRegion.height + gap;
   const top =
     topBelow + toolbarHeight <= window.innerHeight - gap
       ? topBelow
-      : Math.max(gap, selectionRect.y - toolbarHeight - gap);
-  const left = clamp(selectionRect.x + selectionRect.width - toolbarWidth, gap, window.innerWidth - toolbarWidth - gap);
+      : Math.max(gap, cropRegion.y - toolbarHeight - gap);
+  const left = clamp(cropRegion.x + cropRegion.width - toolbarWidth, gap, window.innerWidth - toolbarWidth - gap);
 
   async function run(fn: () => Promise<void>) {
     setBusy(true);

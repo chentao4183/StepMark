@@ -21,7 +21,7 @@ async function composeDataUrl(): Promise<string> {
   if (!stageRef) {
     throw new Error("editor stage not ready");
   }
-  const { x, y, width, height } = useEditorStore.getState().selectionRect;
+  const { x, y, width, height } = useEditorStore.getState().cropRegion;
   return stageRef.toDataURL({
     x,
     y,

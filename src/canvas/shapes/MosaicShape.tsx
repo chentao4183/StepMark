@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function MosaicShape({ a, selectable = false }: Props) {
-  const bg = useEditorStore((s) => s.backgroundImage);
+  const bg = useEditorStore((s) => s.sourceImage);
   const selectedId = useEditorStore((s) => s.selectedId);
   const select = useEditorStore((s) => s.selectAnnotation);
   const update = useEditorStore((s) => s.updateAnnotation);

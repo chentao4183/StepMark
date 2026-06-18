@@ -5,18 +5,19 @@ import ArrowShape from "../shapes/ArrowShape";
 import TextLabelShape from "../shapes/TextLabelShape";
 import MosaicShape from "../shapes/MosaicShape";
 import SmartAnnotationGroup from "../shapes/SmartAnnotationGroup";
-import type { Annotation } from "../../types/annotation";
+import type { Annotation, Rect } from "../../types/annotation";
 
 interface Props {
   selectable?: boolean;
   onEditText?: (a: Annotation, x: number, y: number) => void;
+  crop: Rect;
 }
 
-export default function AnnotationLayer({ selectable = false, onEditText }: Props) {
+export default function AnnotationLayer({ selectable = false, onEditText, crop }: Props) {
   const annotations = useEditorStore((s) => s.annotations);
 
   return (
-    <Layer>
+    <Layer clipX={crop.x} clipY={crop.y} clipWidth={crop.width} clipHeight={crop.height}>
       {annotations.map((a) => {
         switch (a.type) {
           case "smart":

@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
 import { Stage, Layer, Rect, Image as KonvaImage } from "react-konva";
 import type Konva from "konva";
 import useImage from "use-image";
@@ -131,7 +130,7 @@ export default function SelectorWindow() {
     // Switch to in-place editing: keep the full screenshot as background, edit
     // in screen coordinates so the canvas sits exactly over the selection.
     useToolState.getState().resetAll();
-    initEditor(bg, selection);
+    initEditor(bg, selection, { width: size.width, height: size.height });
     setTool("smart");
     setModeSync("editing");
   }
@@ -143,7 +142,6 @@ export default function SelectorWindow() {
         <div style={{ position: "absolute", inset: 0 }}>
           <EditorView onExit={closeEditorWindow} />
         </div>
-        <SelectionShade stageWidth={size.width} stageHeight={size.height} selection={selection} />
       </div>
     );
   }
@@ -215,64 +213,3 @@ function SelectionMaskRects({
   );
 }
 
-/**
- * Visual-only shade for Snipaste-style editing: keep the selected region clear
- * and lightly gray out the rest of the screen. This is outside the Konva export
- * stage, so copy/save still exports the clean selected region only.
- */
-function SelectionShade({
-  stageWidth,
-  stageHeight,
-  selection,
-}: {
-  stageWidth: number;
-  stageHeight: number;
-  selection: Selection;
-}) {
-  const { x, y, width, height } = selection;
-  const shade = "rgba(0, 0, 0, 0.28)";
-  const common: CSSProperties = {
-    position: "absolute",
-    background: shade,
-    pointerEvents: "none",
-    zIndex: 20,
-  };
-
-  return (
-    <>
-      <div style={{ ...common, left: 0, top: 0, width: stageWidth, height: Math.max(0, y) }} />
-      <div
-        style={{
-          ...common,
-          left: 0,
-          top: y + height,
-          width: stageWidth,
-          height: Math.max(0, stageHeight - (y + height)),
-        }}
-      />
-      <div style={{ ...common, left: 0, top: y, width: Math.max(0, x), height }} />
-      <div
-        style={{
-          ...common,
-          left: x + width,
-          top: y,
-          width: Math.max(0, stageWidth - (x + width)),
-          height,
-        }}
-      />
-      <div
-        style={{
-          position: "absolute",
-          left: x,
-          top: y,
-          width,
-          height,
-          border: "2px solid #1e90ff",
-          boxSizing: "border-box",
-          pointerEvents: "none",
-          zIndex: 21,
-        }}
-      />
-    </>
-  );
-}

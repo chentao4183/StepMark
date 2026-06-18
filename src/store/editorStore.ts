@@ -1,21 +1,27 @@
 import { create } from "zustand";
-import type { Annotation, ToolType } from "../types/annotation";
+import type { Annotation, Rect, ToolType } from "../types/annotation";
+import { clampCrop } from "../geometry/crop";
 
 interface EditorSnapshot {
   annotations: Annotation[];
+  cropRegion: Rect;
 }
 
 interface EditorState {
-  backgroundImage: string;
-  selectionRect: { x: number; y: number; width: number; height: number };
+  sourceImage: string;
+  cropRegion: Rect;
+  sourceWidth: number;
+  sourceHeight: number;
   annotations: Annotation[];
   selectedId: string | null;
   currentTool: ToolType;
   history: EditorSnapshot[];
   redoStack: EditorSnapshot[];
 
-  init: (bg: string, selection: { x: number; y: number; width: number; height: number }) => void;
+  init: (bg: string, crop: Rect, sourceSize?: { width: number; height: number }) => void;
   setTool: (t: ToolType) => void;
+  setCropRegion: (crop: Rect) => void;
+  beginCropChange: () => void;
   addAnnotation: (a: Annotation) => void;
   updateAnnotation: (id: string, patch: Partial<Annotation>) => void;
   removeAnnotation: (id: string) => void;
@@ -25,22 +31,48 @@ interface EditorState {
 }
 
 function snapshot(s: EditorState): EditorSnapshot {
-  return { annotations: JSON.parse(JSON.stringify(s.annotations)) };
+  return {
+    annotations: JSON.parse(JSON.stringify(s.annotations)) as Annotation[],
+    cropRegion: { ...s.cropRegion },
+  };
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
-  backgroundImage: "",
-  selectionRect: { x: 0, y: 0, width: 0, height: 0 },
+  sourceImage: "",
+  cropRegion: { x: 0, y: 0, width: 0, height: 0 },
+  sourceWidth: window.innerWidth,
+  sourceHeight: window.innerHeight,
   annotations: [],
   selectedId: null,
   currentTool: "smart",
   history: [],
   redoStack: [],
 
-  init: (bg, selection) =>
-    set({ backgroundImage: bg, selectionRect: selection, annotations: [], selectedId: null, history: [], redoStack: [] }),
+  init: (bg, crop, sourceSize) =>
+    set({
+      sourceImage: bg,
+      cropRegion: crop,
+      sourceWidth: sourceSize?.width ?? window.innerWidth,
+      sourceHeight: sourceSize?.height ?? window.innerHeight,
+      annotations: [],
+      selectedId: null,
+      history: [],
+      redoStack: [],
+    }),
 
   setTool: (t) => set({ currentTool: t, selectedId: null }),
+
+  setCropRegion: (crop) =>
+    set((s) => ({
+      cropRegion: clampCrop(crop, { width: s.sourceWidth, height: s.sourceHeight }),
+    })),
+
+  beginCropChange: () =>
+    set((s) => ({
+      history: [...s.history, snapshot(s)],
+      redoStack: [],
+      selectedId: null,
+    })),
 
   addAnnotation: (a) =>
     set((s) => {
@@ -77,6 +109,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       const prev = s.history[s.history.length - 1];
       return {
         annotations: prev.annotations,
+        cropRegion: prev.cropRegion,
         history: s.history.slice(0, -1),
         redoStack: [...s.redoStack, snapshot(s)],
         selectedId: null,
@@ -89,6 +122,7 @@ export const useEditorStore = create<EditorState>((set) => ({
       const next = s.redoStack[s.redoStack.length - 1];
       return {
         annotations: next.annotations,
+        cropRegion: next.cropRegion,
         redoStack: s.redoStack.slice(0, -1),
         history: [...s.history, snapshot(s)],
         selectedId: null,

@@ -6,6 +6,7 @@ import { exportToFile } from "../canvas/exportCanvas";
 import EditorStage from "../canvas/EditorStage";
 import Toolbar from "./Toolbar";
 import TextInputOverlay from "./TextInputOverlay";
+import CropOverlay from "./CropOverlay";
 
 interface Props {
   /** Called when the user hits Esc to exit the editor. */
@@ -33,6 +34,7 @@ export default function EditorView({ onExit }: Props) {
   return (
     <>
       <EditorStage active={active} onEditText={selection.beginEditText} />
+      <CropOverlay />
       <Toolbar onClose={closeEditor} />
       {active.kind === "smart" && active.smart.isEnteringText && active.smart.textPos && (
         <TextInputOverlay

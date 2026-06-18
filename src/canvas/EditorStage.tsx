@@ -14,7 +14,8 @@ interface Props {
 }
 
 export default function EditorStage({ active, onEditText }: Props) {
-  const bg = useEditorStore((s) => s.backgroundImage);
+  const bg = useEditorStore((s) => s.sourceImage);
+  const crop = useEditorStore((s) => s.cropRegion);
   const [image] = useImage(bg);
   const stageRef = useRef<Konva.Stage>(null);
 
@@ -43,14 +44,13 @@ export default function EditorStage({ active, onEditText }: Props) {
       }}
     >
       <Layer>
-        {/* Background is the full screenshot, drawn at full window size so tools
-            operate in screen space (in-place editing). selectionRect now only
-            drives the export crop, not the image transform. */}
+        {/* Background is the full screenshot. Tools operate in screen/source
+            coordinates, while cropRegion controls clipping, shade, and export. */}
         <KonvaImage image={image} x={0} y={0} width={window.innerWidth} height={window.innerHeight} />
       </Layer>
-      <AnnotationLayer selectable onEditText={onEditText} />
+      <AnnotationLayer selectable onEditText={onEditText} crop={crop} />
       {/* Preview layer for in-progress annotations */}
-      <Layer listening={false}>
+      <Layer listening={false} clipX={crop.x} clipY={crop.y} clipWidth={crop.width} clipHeight={crop.height}>
         {active.kind === "smart" && active.smart.previewRect && (
           <Rect
             x={active.smart.previewRect.x}
