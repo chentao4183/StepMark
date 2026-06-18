@@ -11,7 +11,6 @@ interface ToolDef {
 }
 
 const TOOLS: ToolDef[] = [
-  { id: "select", label: "⬚", hint: "选择 (V)" },
   { id: "smart", label: "✦", hint: "智能标注 (S)" },
   { id: "rect", label: "▭", hint: "矩形 (R)" },
   { id: "arrow", label: "➤", hint: "箭头 (A)" },
@@ -19,12 +18,27 @@ const TOOLS: ToolDef[] = [
   { id: "mosaic", label: "▦", hint: "马赛克 (M)" },
 ];
 
-export default function Toolbar() {
+interface Props {
+  onClose?: () => void;
+}
+
+export default function Toolbar({ onClose }: Props) {
   const currentTool = useEditorStore((s) => s.currentTool);
   const setTool = useEditorStore((s) => s.setTool);
+  const selectionRect = useEditorStore((s) => s.selectionRect);
   const undo = useEditorStore((s) => s.undo);
   const redo = useEditorStore((s) => s.redo);
   const [busy, setBusy] = useState(false);
+
+  const toolbarWidth = 430;
+  const toolbarHeight = 50;
+  const gap = 8;
+  const topBelow = selectionRect.y + selectionRect.height + gap;
+  const top =
+    topBelow + toolbarHeight <= window.innerHeight - gap
+      ? topBelow
+      : Math.max(gap, selectionRect.y - toolbarHeight - gap);
+  const left = clamp(selectionRect.x + selectionRect.width - toolbarWidth, gap, window.innerWidth - toolbarWidth - gap);
 
   async function run(fn: () => Promise<void>) {
     setBusy(true);
@@ -39,13 +53,17 @@ export default function Toolbar() {
     }
   }
 
+  function closeEditor() {
+    if (onClose) onClose();
+    else void hideCurrentWindow();
+  }
+
   return (
     <div
       style={{
         position: "absolute",
-        bottom: 24,
-        left: "50%",
-        transform: "translateX(-50%)",
+        top,
+        left,
         display: "flex",
         gap: 4,
         background: "#2d2d44",
@@ -79,19 +97,38 @@ export default function Toolbar() {
 
       <div style={divider} />
 
-      <button title="复制到剪贴板 (Ctrl+C)" style={btn(false)} onClick={() => run(exportToClipboard)} disabled={busy}>
+      <button
+        title="复制到剪贴板 (Ctrl+C)"
+        style={btn(false)}
+        onClick={() =>
+          run(async () => {
+            await exportToClipboard();
+            closeEditor();
+          })
+        }
+        disabled={busy}
+      >
         ⧉
       </button>
-      <button title="保存为 PNG" style={btn(false)} onClick={() => run(() => exportToFile("png"))} disabled={busy}>
+      <button
+        title="保存为 PNG"
+        style={btn(false)}
+        onClick={() =>
+          run(async () => {
+            const saved = await exportToFile("png");
+            if (saved) closeEditor();
+          })
+        }
+        disabled={busy}
+      >
         💾
       </button>
-      <button title="保存为 JPG" style={btn(false)} onClick={() => run(() => exportToFile("jpg"))} disabled={busy}>
-        🖼
-      </button>
-
-      <div style={divider} />
-
-      <button title="退出 (Esc)" style={{ ...btn(false), color: "#ff6b81" }} onClick={() => hideCurrentWindow()} disabled={busy}>
+      <button
+        title="退出 (Esc)"
+        style={{ ...btn(false), color: "#ff6b81" }}
+        onClick={closeEditor}
+        disabled={busy}
+      >
         ✕
       </button>
     </div>
@@ -121,3 +158,8 @@ const divider: React.CSSProperties = {
   background: "rgba(255,255,255,0.12)",
   margin: "2px 4px",
 };
+
+function clamp(value: number, min: number, max: number): number {
+  if (max < min) return min;
+  return Math.min(max, Math.max(min, value));
+}

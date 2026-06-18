@@ -32,8 +32,16 @@ export default function ArrowShape({ a, selectable = false }: Props) {
       pointerWidth={10}
       listening={selectable}
       draggable={isSelected}
-      onClick={() => selectable && select(a.id)}
-      onTap={() => selectable && select(a.id)}
+      onClick={(e) => {
+        if (!selectable) return;
+        e.cancelBubble = true;
+        select(a.id);
+      }}
+      onTap={(e) => {
+        if (!selectable) return;
+        e.cancelBubble = true;
+        select(a.id);
+      }}
       onDragEnd={(e) => {
         // Translate both endpoints by the drag delta.
         const dx = e.target.x();

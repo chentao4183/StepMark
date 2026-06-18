@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { onScreenshotTriggered, showSelectorWindow, getAutostart, setAutostart } from "../ipc/bridge";
 
 const FIRST_RUN_KEY = "snapnote.firstRunDone";
@@ -11,6 +12,8 @@ export default function MainApp() {
     // Show the first-run setup on the very first launch only.
     if (!localStorage.getItem(FIRST_RUN_KEY)) {
       setShowSetup(true);
+      const win = getCurrentWebviewWindow();
+      void win.show().then(() => win.setFocus());
     }
     // Reflect current autostart state.
     getAutostart().then(setAutostartState).catch(() => {});
@@ -35,6 +38,7 @@ export default function MainApp() {
   function finishSetup() {
     localStorage.setItem(FIRST_RUN_KEY, "1");
     setShowSetup(false);
+    void getCurrentWebviewWindow().hide();
   }
 
   return (

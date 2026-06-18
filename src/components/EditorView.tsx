@@ -22,8 +22,9 @@ interface Props {
 export default function EditorView({ onExit }: Props) {
   const active = useActiveTool();
   const selection = useSelectionTool();
+  const closeEditor = onExit ?? (() => hideCurrentWindow());
   useEditorShortcuts({
-    onExit: onExit ?? (() => hideCurrentWindow()),
+    onExit: closeEditor,
     onSave: () => {
       void exportToFile("png");
     },
@@ -31,12 +32,12 @@ export default function EditorView({ onExit }: Props) {
 
   return (
     <>
-      <EditorStage onEditText={selection.beginEditText} />
-      <Toolbar />
+      <EditorStage active={active} onEditText={selection.beginEditText} />
+      <Toolbar onClose={closeEditor} />
       {active.kind === "smart" && active.smart.isEnteringText && active.smart.textPos && (
         <TextInputOverlay
           x={active.smart.textPos.x}
-          y={active.smart.textPos.y - 28}
+          y={active.smart.textPos.y}
           initial=""
           onSubmit={active.smart.submitText}
           onCancel={active.smart.cancelText}

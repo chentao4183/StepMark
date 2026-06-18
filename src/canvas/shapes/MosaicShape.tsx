@@ -1,4 +1,4 @@
-import { Image as KonvaImage } from "react-konva";
+import { Image as KonvaImage, Rect } from "react-konva";
 import { useEffect, useState } from "react";
 import useImage from "use-image";
 import { useEditorStore } from "../../store/editorStore";
@@ -11,10 +11,19 @@ const BLOCK_SIZE = 10;
  * The background is the full screenshot drawn at (0,0) window-size, so the
  * source region is sampled directly at the rect's screen coords.
  */
-export default function MosaicShape({ a }: { a: Annotation }) {
+interface Props {
+  a: Annotation;
+  selectable?: boolean;
+}
+
+export default function MosaicShape({ a, selectable = false }: Props) {
   const bg = useEditorStore((s) => s.backgroundImage);
+  const selectedId = useEditorStore((s) => s.selectedId);
+  const select = useEditorStore((s) => s.selectAnnotation);
+  const update = useEditorStore((s) => s.updateAnnotation);
   const [bgImg] = useImage(bg);
   const [mosaicCanvas, setMosaicCanvas] = useState<HTMLCanvasElement | null>(null);
+  const isSelected = selectable && selectedId === a.id;
 
   useEffect(() => {
     if (!bgImg || !a.rect) return;
@@ -44,5 +53,41 @@ export default function MosaicShape({ a }: { a: Annotation }) {
   }, [bgImg, a.rect]);
 
   if (!a.rect || !mosaicCanvas) return null;
-  return <KonvaImage image={mosaicCanvas} x={a.rect.x} y={a.rect.y} listening={false} />;
+  return (
+    <>
+      <KonvaImage
+        image={mosaicCanvas}
+        x={a.rect.x}
+        y={a.rect.y}
+        listening={selectable}
+        draggable={isSelected}
+        onClick={(e) => {
+          if (!selectable) return;
+          e.cancelBubble = true;
+          select(a.id);
+        }}
+        onTap={(e) => {
+          if (!selectable) return;
+          e.cancelBubble = true;
+          select(a.id);
+        }}
+        onDragEnd={(e) => {
+          const node = e.target;
+          update(a.id, { rect: { ...a.rect!, x: node.x(), y: node.y() } });
+        }}
+      />
+      {isSelected && (
+        <Rect
+          x={a.rect.x - 4}
+          y={a.rect.y - 4}
+          width={a.rect.width + 8}
+          height={a.rect.height + 8}
+          stroke="#00d2ff"
+          strokeWidth={1}
+          dash={[4, 4]}
+          listening={false}
+        />
+      )}
+    </>
+  );
 }

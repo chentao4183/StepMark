@@ -2,33 +2,18 @@ import { useRef } from "react";
 import type Konva from "konva";
 import { useEditorStore } from "../store/editorStore";
 import { useToolState } from "../store/toolState";
-import { nearestCorner } from "../geometry/corners";
-import { layoutSmartArrow } from "../geometry/arrowLayout";
-import { DEFAULT_STYLE, type Annotation, type Corner } from "../types/annotation";
+import { nearestRectEdgePoint } from "../geometry/rectEdge";
+import { DEFAULT_STYLE, type Annotation } from "../types/annotation";
 
-type Phase = "idle" | "dragging-rect" | "placing-arrow" | "entering-text";
+type Phase = "idle" | "drawing-rect" | "selecting-label-position" | "editing-label";
 
-/**
- * Smart annotation 5-step flow backed by the shared tool-state store so that
- * the Stage (handlers) and the overlay (text input) observe one machine.
- *
- *   1. idle            - waiting for mousedown
- *   2. dragging-rect   - drawing the rect
- *   3. placing-arrow   - rect committed, arrow end follows the mouse
- *   4. click           - pin the arrow; end + label anchor are resolved so the
- *                        arrow has a minimum length and the label sits past the tip
- *   5. entering-text   - label input open; on submit the annotation commits
- *                        (empty text is allowed → renders as box + arrow only)
- */
 export function useSmartAnnotationTool() {
   const addAnnotation = useEditorStore((s) => s.addAnnotation);
   const ts = useToolState();
   const phaseRef = useRef<Phase>("idle");
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const rectRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
-  const startCornerRef = useRef<Corner>("tr");
-  const arrowEndRef = useRef<{ x: number; y: number } | null>(null);
-  const labelAnchorRef = useRef<{ x: number; y: number } | null>(null);
+  const skipNextClickRef = useRef(false);
 
   function setPhase(p: Phase) {
     phaseRef.current = p;
@@ -44,11 +29,11 @@ export function useSmartAnnotationTool() {
       const p = pos(e);
       dragStartRef.current = p;
       ts.setSmart({ previewRect: { x: p.x, y: p.y, width: 0, height: 0 } });
-      setPhase("dragging-rect");
+      setPhase("drawing-rect");
     },
     onMouseMove: (e: Konva.KonvaEventObject<MouseEvent>) => {
       const p = pos(e);
-      if (phaseRef.current === "dragging-rect" && dragStartRef.current) {
+      if (phaseRef.current === "drawing-rect" && dragStartRef.current) {
         const s = dragStartRef.current;
         ts.setSmart({
           previewRect: {
@@ -58,54 +43,69 @@ export function useSmartAnnotationTool() {
             height: Math.abs(p.y - s.y),
           },
         });
-      } else if (phaseRef.current === "placing-arrow") {
-        arrowEndRef.current = p;
-        ts.setSmart({ arrowEnd: p });
+      } else if (phaseRef.current === "selecting-label-position" && rectRef.current) {
+        ts.setSmart({
+          arrowStart: nearestRectEdgePoint(rectRef.current, p),
+          arrowEnd: p,
+        });
       }
     },
-    onMouseUp: () => {
-      if (phaseRef.current === "dragging-rect") {
-        const r = ts.previewRect;
-        if (r && r.width > 5 && r.height > 5) {
-          rectRef.current = r;
-          startCornerRef.current = "tr";
-          ts.setSmart({ previewRect: null, rect: r, startCorner: "tr" });
-          setPhase("placing-arrow");
-        } else {
-          reset();
-        }
+    onMouseUp: (e: Konva.KonvaEventObject<MouseEvent>) => {
+      if (phaseRef.current !== "drawing-rect") return;
+      const r = ts.previewRect;
+      if (!r || r.width <= 5 || r.height <= 5) {
+        reset();
+        return;
       }
+
+      const p = pos(e);
+      rectRef.current = r;
+      skipNextClickRef.current = true;
+      ts.setSmart({
+        previewRect: null,
+        rect: r,
+        arrowStart: nearestRectEdgePoint(r, p),
+        arrowEnd: p,
+        textPos: null,
+      });
+      setPhase("selecting-label-position");
     },
     onClick: (e: Konva.KonvaEventObject<MouseEvent>) => {
-      if (phaseRef.current !== "placing-arrow" || !rectRef.current) return;
+      if (phaseRef.current !== "selecting-label-position" || !rectRef.current) return;
+      if (skipNextClickRef.current) {
+        skipNextClickRef.current = false;
+        return;
+      }
+
       const p = pos(e);
-      const corner: Corner = nearestCorner(rectRef.current, p);
-      // Resolve a minimum-length arrow end and an outward label anchor so the
-      // box + arrow + label don't crowd together.
-      const { end, label } = layoutSmartArrow(rectRef.current, corner, p);
-      startCornerRef.current = corner;
-      arrowEndRef.current = end;
-      labelAnchorRef.current = label;
-      ts.setSmart({ startCorner: corner, arrowEnd: end, textPos: label });
-      setPhase("entering-text");
+      ts.setSmart({
+        arrowStart: nearestRectEdgePoint(rectRef.current, p),
+        arrowEnd: p,
+        textPos: p,
+      });
+      setPhase("editing-label");
     },
   };
 
   function submitText(text: string) {
-    if (rectRef.current && arrowEndRef.current) {
+    const rect = ts.rect;
+    const arrowStart = ts.arrowStart;
+    const arrowEnd = ts.arrowEnd;
+    const labelAnchor = ts.textPos;
+
+    if (rect && arrowStart && arrowEnd && labelAnchor && text.trim()) {
       const a: Annotation = {
         id: crypto.randomUUID(),
         type: "smart",
-        rect: rectRef.current,
-        // Empty note is allowed; TextLabelShape hides itself when note is empty,
-        // leaving just the box + arrow.
+        rect,
         note: text,
         arrow: {
-          startCorner: startCornerRef.current,
-          endX: arrowEndRef.current.x,
-          endY: arrowEndRef.current.y,
-          labelX: labelAnchorRef.current?.x,
-          labelY: labelAnchorRef.current?.y,
+          startX: arrowStart.x,
+          startY: arrowStart.y,
+          endX: arrowEnd.x,
+          endY: arrowEnd.y,
+          labelX: labelAnchor.x,
+          labelY: labelAnchor.y,
         },
         style: { ...DEFAULT_STYLE },
       };
@@ -118,9 +118,7 @@ export function useSmartAnnotationTool() {
     setPhase("idle");
     dragStartRef.current = null;
     rectRef.current = null;
-    startCornerRef.current = "tr";
-    arrowEndRef.current = null;
-    labelAnchorRef.current = null;
+    skipNextClickRef.current = false;
     ts.resetSmart();
   }
 
@@ -128,7 +126,7 @@ export function useSmartAnnotationTool() {
     phase: phaseRef.current,
     previewRect: ts.previewRect,
     rect: ts.rect,
-    startCorner: ts.startCorner,
+    arrowStart: ts.arrowStart,
     arrowEnd: ts.arrowEnd,
     textPos: ts.textPos,
     isEnteringText: ts.textPos !== null,

@@ -40,6 +40,7 @@ export async function showSelectorWindow(): Promise<void> {
   if (selector) {
     await selector.show();
     await selector.setFocus();
+    await emitTo("selector", "selector-start", {});
   }
 }
 

@@ -23,6 +23,7 @@ interface SmartDraft {
   previewRect: Rect | null;
   rect: Rect | null;
   startCorner: Corner;
+  arrowStart: { x: number; y: number } | null;
   arrowEnd: { x: number; y: number } | null;
   textPos: { x: number; y: number } | null;
 }
@@ -39,12 +40,14 @@ interface ToolState extends SmartDraft {
   setArrowPreview: (a: ArrowDraft | null) => void;
   setTextPos: (p: { x: number; y: number } | null) => void;
   resetSmart: () => void;
+  resetAll: () => void;
 }
 
 const emptySmart: SmartDraft = {
   previewRect: null,
   rect: null,
   startCorner: "tr",
+  arrowStart: null,
   arrowEnd: null,
   textPos: null,
 };
@@ -62,4 +65,5 @@ export const useToolState = create<ToolState>((set) => ({
   setArrowPreview: (a) => set({ arrowPreview: a }),
   setTextPos: (p) => set({ textPos: p }),
   resetSmart: () => set({ ...emptySmart }),
+  resetAll: () => set({ ...emptySmart, rectPreview: null, mosaicPreview: null, arrowPreview: null, textPos: null }),
 }));

@@ -26,9 +26,9 @@ export default function AnnotationLayer({ selectable = false, onEditText }: Prop
           case "arrow":
             return <ArrowShape key={a.id} a={a} selectable={selectable} />;
           case "text":
-            return <TextLabelShape key={a.id} a={a} />;
+            return <TextLabelShape key={a.id} a={a} selectable={selectable} onEditText={onEditText} />;
           case "mosaic":
-            return <MosaicShape key={a.id} a={a} />;
+            return <MosaicShape key={a.id} a={a} selectable={selectable} />;
           default:
             return null;
         }

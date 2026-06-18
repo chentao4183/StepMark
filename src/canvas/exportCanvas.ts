@@ -37,14 +37,16 @@ export async function exportToClipboard(): Promise<void> {
   await copyImageToClipboard(dataUrl);
 }
 
-export async function exportToFile(format: "png" | "jpg"): Promise<void> {
+export async function exportToFile(format: "png" | "jpg"): Promise<boolean> {
   const dataUrl = await composeDataUrl();
   const { save } = await import("@tauri-apps/plugin-dialog");
   const path = await save({
     defaultPath: `snapnote-${Date.now()}.${format}`,
     filters: [{ name: format.toUpperCase(), extensions: [format] }],
   });
-  if (path) {
-    await saveImage(dataUrl, path, format);
+  if (!path) {
+    return false;
   }
+  await saveImage(dataUrl, path, format);
+  return true;
 }

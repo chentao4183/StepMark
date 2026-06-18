@@ -24,8 +24,16 @@ export default function RectShape({ a, selectable = false }: Props) {
       strokeWidth={a.style.borderWidth}
       listening={selectable}
       draggable={isSelected}
-      onClick={() => selectable && select(a.id)}
-      onTap={() => selectable && select(a.id)}
+      onClick={(e) => {
+        if (!selectable) return;
+        e.cancelBubble = true;
+        select(a.id);
+      }}
+      onTap={(e) => {
+        if (!selectable) return;
+        e.cancelBubble = true;
+        select(a.id);
+      }}
       onDragEnd={(e) => {
         const node = e.target;
         update(a.id, { rect: { ...a.rect!, x: node.x(), y: node.y() } });

@@ -4,18 +4,17 @@ import type Konva from "konva";
 import useImage from "use-image";
 import { useEditorStore } from "../store/editorStore";
 import AnnotationLayer from "./layers/AnnotationLayer";
-import { useActiveTool } from "../tools";
-import { cornerPoint } from "../geometry/corners";
+import type { ActiveTool } from "../tools";
 import { setEditorStage } from "./exportCanvas";
 import type { Annotation } from "../types/annotation";
 
 interface Props {
+  active: ActiveTool;
   onEditText?: (a: Annotation, x: number, y: number) => void;
 }
 
-export default function EditorStage({ onEditText }: Props) {
+export default function EditorStage({ active, onEditText }: Props) {
   const bg = useEditorStore((s) => s.backgroundImage);
-  const active = useActiveTool();
   const [image] = useImage(bg);
   const stageRef = useRef<Konva.Stage>(null);
 
@@ -49,7 +48,7 @@ export default function EditorStage({ onEditText }: Props) {
             drives the export crop, not the image transform. */}
         <KonvaImage image={image} x={0} y={0} width={window.innerWidth} height={window.innerHeight} />
       </Layer>
-      <AnnotationLayer selectable={active.kind === "select"} onEditText={onEditText} />
+      <AnnotationLayer selectable onEditText={onEditText} />
       {/* Preview layer for in-progress annotations */}
       <Layer listening={false}>
         {active.kind === "smart" && active.smart.previewRect && (
@@ -62,11 +61,21 @@ export default function EditorStage({ onEditText }: Props) {
             strokeWidth={3}
           />
         )}
-        {active.kind === "smart" && active.smart.rect && active.smart.arrowEnd && (
+        {active.kind === "smart" && !active.smart.previewRect && active.smart.rect && (
+          <Rect
+            x={active.smart.rect.x}
+            y={active.smart.rect.y}
+            width={active.smart.rect.width}
+            height={active.smart.rect.height}
+            stroke="#ff4757"
+            strokeWidth={3}
+          />
+        )}
+        {active.kind === "smart" && active.smart.arrowStart && active.smart.arrowEnd && (
           <Arrow
             points={[
-              cornerPoint(active.smart.rect, active.smart.startCorner).x,
-              cornerPoint(active.smart.rect, active.smart.startCorner).y,
+              active.smart.arrowStart.x,
+              active.smart.arrowStart.y,
               active.smart.arrowEnd.x,
               active.smart.arrowEnd.y,
             ]}

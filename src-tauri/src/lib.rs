@@ -1,7 +1,6 @@
 mod commands;
 mod tray;
 
-use tauri::Emitter;
 use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_global_shortcut::{
     Builder as ShortcutBuilder, Code, GlobalShortcutExt, Shortcut, ShortcutState,
@@ -19,7 +18,7 @@ pub fn run() {
     let global_shortcut = ShortcutBuilder::new()
         .with_handler(|app, _shortcut, event| {
             if event.state == ShortcutState::Pressed {
-                let _ = app.emit("screenshot-triggered", ());
+                tray::trigger_screenshot(app);
             }
         })
         .build();

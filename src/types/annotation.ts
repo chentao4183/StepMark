@@ -26,15 +26,14 @@ export const DEFAULT_STYLE: AnnotationStyle = {
 };
 
 export interface ArrowData {
-  // For 'smart': which corner of the rect the arrow starts from.
+  // Legacy smart annotations may still store a corner id.
   startCorner?: Corner;
-  // For 'arrow' tool: absolute start coords (rect-independent).
+  // For 'arrow': absolute start coords. For 'smart': rect-edge anchor coords.
   startX?: number;
   startY?: number;
   endX: number;
   endY: number;
-  // For 'smart': where the text label sits (offset past the arrow tip). Falls
-  // back to (endX, endY) when unset for backward compatibility.
+  // Where the text label sits. Falls back to (endX, endY) for compatibility.
   labelX?: number;
   labelY?: number;
 }

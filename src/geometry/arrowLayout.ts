@@ -6,8 +6,8 @@ export interface Point {
   y: number;
 }
 
-export const MIN_ARROW_LEN = 60; // px — keep the arrow visible even on a short drag
-export const LABEL_GAP = 10; // px — distance from arrow tip to the label box
+export const MIN_ARROW_LEN = 90; // px - keep the arrow visible even on a short drag
+export const LABEL_GAP = 16; // px - distance from arrow tip to the label box anchor
 
 /**
  * Compute the arrow's end point: take the click point, but if it lies too close

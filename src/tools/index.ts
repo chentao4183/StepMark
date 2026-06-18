@@ -34,3 +34,5 @@ export function useActiveTool() {
       return { kind: "mosaic" as const, mosaic };
   }
 }
+
+export type ActiveTool = ReturnType<typeof useActiveTool>;

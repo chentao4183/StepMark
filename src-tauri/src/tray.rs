@@ -4,6 +4,14 @@ use tauri::{
     AppHandle, Emitter, Manager, Runtime,
 };
 
+pub fn trigger_screenshot<R: Runtime>(app: &AppHandle<R>) {
+    if let Some(win) = app.get_webview_window("selector") {
+        let _ = win.show();
+        let _ = win.set_focus();
+        let _ = app.emit_to("selector", "selector-start", ());
+    }
+}
+
 /// Build the system-tray icon, its context menu, and event handlers.
 pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let screenshot_item = MenuItem::with_id(app, "screenshot", "Screenshot (F1)", true, None::<&str>)?;
@@ -17,7 +25,7 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| match event.id.as_ref() {
             "screenshot" => {
-                let _ = app.emit("screenshot-triggered", ());
+                trigger_screenshot(app);
             }
             "show" => {
                 if let Some(win) = app.get_webview_window("main") {
@@ -32,7 +40,7 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
         })
         .on_tray_icon_event(|tray, event| {
             if let TrayIconEvent::Click { button: MouseButton::Left, .. } = event {
-                let _ = tray.app_handle().emit("screenshot-triggered", ());
+                trigger_screenshot(tray.app_handle());
             }
         })
         .build(app)?;
