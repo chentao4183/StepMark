@@ -2,7 +2,7 @@ import { useRef } from "react";
 import type Konva from "konva";
 import { useEditorStore } from "../store/editorStore";
 import { useToolState } from "../store/toolState";
-import { nearestRectEdgePoint } from "../geometry/rectEdge";
+import { cornerPoint, nearestCorner } from "../geometry/corners";
 import { DEFAULT_STYLE, type Annotation } from "../types/annotation";
 
 type Phase = "idle" | "drawing-rect" | "selecting-label-position" | "editing-label";
@@ -45,7 +45,7 @@ export function useSmartAnnotationTool() {
         });
       } else if (phaseRef.current === "selecting-label-position" && rectRef.current) {
         ts.setSmart({
-          arrowStart: nearestRectEdgePoint(rectRef.current, p),
+          arrowStart: cornerPoint(rectRef.current, ts.startCorner),
           arrowEnd: p,
         });
       }
@@ -61,10 +61,16 @@ export function useSmartAnnotationTool() {
       const p = pos(e);
       rectRef.current = r;
       skipNextClickRef.current = true;
+      // spec §5.2: the arrow starts from the rect corner nearest to where the
+      // mouse was released. Storing the corner id (not absolute coords) lets the
+      // anchor recompute automatically as the rect moves/resizes, and drives the
+      // label-extend direction in spec §5.3.
+      const corner = nearestCorner(r, p);
       ts.setSmart({
         previewRect: null,
         rect: r,
-        arrowStart: nearestRectEdgePoint(r, p),
+        startCorner: corner,
+        arrowStart: cornerPoint(r, corner),
         arrowEnd: p,
         textPos: null,
       });
@@ -79,7 +85,7 @@ export function useSmartAnnotationTool() {
 
       const p = pos(e);
       ts.setSmart({
-        arrowStart: nearestRectEdgePoint(rectRef.current, p),
+        arrowStart: cornerPoint(rectRef.current, ts.startCorner),
         arrowEnd: p,
         textPos: p,
       });
@@ -100,8 +106,11 @@ export function useSmartAnnotationTool() {
         rect,
         note: text,
         arrow: {
-          startX: arrowStart.x,
-          startY: arrowStart.y,
+          // Smart annotations store the corner id, not absolute start coords,
+          // so the anchor and the label-extend direction (spec §5.3) stay
+          // correct when the rect moves. Absolute startX/startY is for the
+          // standalone arrow tool only.
+          startCorner: ts.startCorner,
           endX: arrowEnd.x,
           endY: arrowEnd.y,
           labelX: labelAnchor.x,

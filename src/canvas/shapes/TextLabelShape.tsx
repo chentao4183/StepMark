@@ -1,7 +1,8 @@
 import { Group, Rect, Text } from "react-konva";
 import type { Annotation } from "../../types/annotation";
 import { useEditorStore } from "../../store/editorStore";
-import { nearestRectEdgePoint } from "../../geometry/rectEdge";
+import { nearestCorner } from "../../geometry/corners";
+import { labelBoxOffset } from "../../geometry/labelBox";
 
 const PAD_X = 10;
 const PAD_Y = 5;
@@ -63,13 +64,17 @@ export default function TextLabelShape({ a, selectable = false, onEditText }: Pr
       }}
       onDragEnd={(e) => {
         const { labelX: newLabelX, labelY: newLabelY } = labelAnchorFromBox(a, e.target.x(), e.target.y(), boxWidth, boxHeight);
-        const newStart = a.rect ? nearestRectEdgePoint(a.rect, { x: newLabelX, y: newLabelY }) : null;
         e.target.position({ x: boxX, y: boxY });
         update(a.id, {
           arrow: {
             ...a.arrow!,
-            startX: newStart?.x ?? a.arrow!.startX,
-            startY: newStart?.y ?? a.arrow!.startY,
+            // Smart annotation: re-pick the nearest rect corner to the new label
+            // position and rebind the arrow origin to that corner (spec §5.2/§5.3
+            // stay consistent after a drag). Keep the corner id as the source of
+            // truth; standalone arrows fall back to their stored absolute coords.
+            startCorner: a.rect ? nearestCorner(a.rect, { x: newLabelX, y: newLabelY }) : a.arrow!.startCorner,
+            startX: undefined,
+            startY: undefined,
             endX: newLabelX,
             endY: newLabelY,
             labelX: newLabelX,
@@ -121,22 +126,14 @@ function labelBoxPosition(
   boxWidth: number,
   boxHeight: number,
 ): { boxX: number; boxY: number } {
-  if (a.arrow?.startX !== undefined && a.arrow.startY !== undefined) {
-    return { boxX: labelX, boxY: labelY };
+  // Smart annotations store startCorner; the label extends away from the rect
+  // per spec §5.3. Standalone arrows have no rect/corner, so the anchor is the
+  // box's top-left (label extends down-right from the click point).
+  if (a.arrow?.startCorner) {
+    const off = labelBoxOffset(a.arrow.startCorner, boxWidth, boxHeight);
+    return { boxX: labelX + off.dx, boxY: labelY + off.dy };
   }
-
-  switch (a.arrow?.startCorner) {
-    case "tl":
-      return { boxX: labelX - boxWidth, boxY: labelY - boxHeight };
-    case "tr":
-      return { boxX: labelX, boxY: labelY - boxHeight };
-    case "bl":
-      return { boxX: labelX - boxWidth, boxY: labelY };
-    case "br":
-      return { boxX: labelX, boxY: labelY };
-    default:
-      return { boxX: labelX - boxWidth / 2, boxY: labelY - boxHeight / 2 };
-  }
+  return { boxX: labelX, boxY: labelY };
 }
 
 function labelAnchorFromBox(
@@ -146,20 +143,11 @@ function labelAnchorFromBox(
   boxWidth: number,
   boxHeight: number,
 ): { labelX: number; labelY: number } {
-  if (a.arrow?.startX !== undefined && a.arrow.startY !== undefined) {
-    return { labelX: boxX, labelY: boxY };
+  // Inverse of labelBoxPosition: recover the anchor (endX,endY) from the box's
+  // current top-left.
+  if (a.arrow?.startCorner) {
+    const off = labelBoxOffset(a.arrow.startCorner, boxWidth, boxHeight);
+    return { labelX: boxX - off.dx, labelY: boxY - off.dy };
   }
-
-  switch (a.arrow?.startCorner) {
-    case "tl":
-      return { labelX: boxX + boxWidth, labelY: boxY + boxHeight };
-    case "tr":
-      return { labelX: boxX, labelY: boxY + boxHeight };
-    case "bl":
-      return { labelX: boxX + boxWidth, labelY: boxY };
-    case "br":
-      return { labelX: boxX, labelY: boxY };
-    default:
-      return { labelX: boxX + boxWidth / 2, labelY: boxY + boxHeight / 2 };
-  }
+  return { labelX: boxX, labelY: boxY };
 }
