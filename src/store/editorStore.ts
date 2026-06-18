@@ -77,7 +77,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   addAnnotation: (a) =>
     set((s) => {
       const history = [...s.history, snapshot(s)];
-      return { annotations: [...s.annotations, a], selectedId: a.id, history, redoStack: [] };
+      return { annotations: [...s.annotations, a], selectedId: null, history, redoStack: [] };
     }),
 
   updateAnnotation: (id, patch) =>
