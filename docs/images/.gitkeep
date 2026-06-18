@@ -1,0 +1,7 @@
+# 把演示截图放在这个目录下，README 通过相对路径 docs/images/xxx.png 引用。
+# 建议文件名（与 README 中的引用保持一致）：
+#   - hero.png            封面大图（一张带智能标注的成品截图）         ✅ 已提供
+#   - flow-select.png     第 1 步：F1 框选区域
+#   - flow-smart.png      第 2 步：智能标注拖框 → 自动生成红框+箭头+文字
+#   - flow-toolbar.png    第 3 步：工具栏编辑（矩形/箭头/文字/马赛克）
+#   - flow-export.png     第 4 步：复制 / 保存导出
