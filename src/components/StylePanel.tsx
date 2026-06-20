@@ -25,17 +25,18 @@ export default function StylePanel({ tool, placement }: Props) {
     <div
       style={{
         position: "absolute",
-        top: placement === "below" ? 54 : undefined,
-        bottom: placement === "above" ? 54 : undefined,
+        top: placement === "below" ? 44 : undefined,
+        bottom: placement === "above" ? 44 : undefined,
         left: 0,
         display: "flex",
         alignItems: "center",
-        gap: 10,
-        padding: "7px 8px",
-        background: "#2d2d44",
-        borderRadius: 8,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.35)",
-        color: "#eef1ff",
+        gap: 8,
+        padding: "4px 6px",
+        background: "#f7f7f7",
+        border: "1px solid #1783ff",
+        borderRadius: 2,
+        boxShadow: "0 1px 3px rgba(0,0,0,0.16)",
+        color: "#263238",
         fontSize: 12,
         zIndex: 51,
         whiteSpace: "nowrap",
@@ -145,7 +146,7 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (value: str
             width: 18,
             height: 18,
             borderRadius: 2,
-            border: value === color ? "2px solid #7ea2ff" : "1px solid rgba(255,255,255,0.45)",
+            border: value === color ? "2px solid #1783ff" : "1px solid #455a64",
             background: color,
             cursor: "pointer",
           }}
@@ -156,7 +157,7 @@ function ColorPicker({ value, onChange }: { value: string; onChange: (value: str
         type="color"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        style={{ width: 22, height: 22, padding: 0, border: "none", background: "transparent", cursor: "pointer" }}
+        style={{ width: 22, height: 22, padding: 0, border: "1px solid #1783ff", background: "#fff", cursor: "pointer" }}
       />
     </div>
   );
@@ -193,7 +194,7 @@ function NumberSlider({
           e.preventDefault();
           setClamped(value + (e.deltaY < 0 ? 1 : -1));
         }}
-        style={{ width: 70 }}
+        style={{ width: 70, accentColor: "#1783ff" }}
       />
       <input
         type="number"
@@ -201,7 +202,7 @@ function NumberSlider({
         max={max}
         value={value}
         onChange={(e) => setClamped(Number(e.target.value))}
-        style={{ width: 42, background: "#1f2033", color: "#fff", border: "1px solid #555a78", borderRadius: 4 }}
+        style={{ width: 42, background: "#fff", color: "#263238", border: "1px solid #1783ff", borderRadius: 0 }}
       />
     </label>
   );
@@ -217,7 +218,7 @@ function Segmented<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div style={{ display: "flex", border: "1px solid #555a78", borderRadius: 5, overflow: "hidden" }}>
+    <div style={{ display: "flex", border: "1px solid #1783ff", borderRadius: 0, overflow: "hidden" }}>
       {options.map((option) => (
         <button
           key={option.value}
@@ -225,8 +226,8 @@ function Segmented<T extends string>({
           style={{
             border: "none",
             padding: "4px 8px",
-            background: value === option.value ? "#5b6cff" : "transparent",
-            color: "#fff",
+            background: value === option.value ? "#1783ff" : "#fff",
+            color: value === option.value ? "#fff" : "#263238",
             cursor: "pointer",
           }}
         >
@@ -242,7 +243,7 @@ function FontSelect({ value, onChange }: { value: string; onChange: (value: stri
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      style={{ background: "#1f2033", color: "#fff", border: "1px solid #555a78", borderRadius: 4, height: 24 }}
+      style={{ background: "#fff", color: "#263238", border: "1px solid #1783ff", borderRadius: 0, height: 24 }}
     >
       {FONT_OPTIONS.map((font) => (
         <option key={font.value} value={font.value}>

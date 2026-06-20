@@ -32,8 +32,8 @@ export default function Toolbar({ onClose }: Props) {
   const [busy, setBusy] = useState(false);
   const [openPanel, setOpenPanel] = useState<StyleTool | null>(null);
 
-  const toolbarWidth = 430;
-  const toolbarHeight = 50;
+  const toolbarWidth = 360;
+  const toolbarHeight = 40;
   const gap = 8;
   const topBelow = cropRegion.y + cropRegion.height + gap;
   const placeBelow = topBelow + toolbarHeight <= window.innerHeight - gap;
@@ -70,11 +70,12 @@ export default function Toolbar({ onClose }: Props) {
       <div
         style={{
           display: "flex",
-          gap: 4,
-          background: "#2d2d44",
-          padding: 6,
-          borderRadius: 10,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+          gap: 2,
+          background: "#f7f7f7",
+          padding: 4,
+          border: "1px solid #1783ff",
+          borderRadius: 2,
+          boxShadow: "0 1px 3px rgba(0,0,0,0.18)",
           userSelect: "none",
         }}
       >
@@ -101,18 +102,8 @@ export default function Toolbar({ onClose }: Props) {
 
         <div style={divider} />
 
-        <button
-          title="复制到剪贴板 (Ctrl+C)"
-          style={btn(false)}
-          onClick={() =>
-            run(async () => {
-              await exportToClipboard();
-              closeEditor();
-            })
-          }
-          disabled={busy}
-        >
-          ⧉
+        <button title="退出 (Esc)" style={{ ...btn(false), color: "#d32f2f" }} onClick={closeEditor} disabled={busy}>
+          ×
         </button>
         <button
           title="保存为 PNG"
@@ -127,8 +118,18 @@ export default function Toolbar({ onClose }: Props) {
         >
           ▣
         </button>
-        <button title="退出 (Esc)" style={{ ...btn(false), color: "#ff6b81" }} onClick={closeEditor} disabled={busy}>
-          ×
+        <button
+          title="复制到剪贴板 (Ctrl+C)"
+          style={btn(false)}
+          onClick={() =>
+            run(async () => {
+              await exportToClipboard();
+              closeEditor();
+            })
+          }
+          disabled={busy}
+        >
+          ⧉
         </button>
       </div>
       {openPanel && <StylePanel tool={openPanel} placement={placeBelow ? "below" : "above"} />}
@@ -138,13 +139,15 @@ export default function Toolbar({ onClose }: Props) {
 
 function btn(active: boolean): React.CSSProperties {
   return {
-    width: 38,
-    height: 38,
+    width: 30,
+    height: 30,
     border: "none",
-    borderRadius: 7,
-    background: active ? "#5b6cff" : "transparent",
-    color: active ? "#fff" : "#cfd2e3",
+    borderRadius: 0,
+    background: active ? "#1783ff" : "transparent",
+    color: active ? "#fff" : "#263238",
     fontSize: 18,
+    fontWeight: 600,
+    lineHeight: 1,
     cursor: "pointer",
     display: "flex",
     alignItems: "center",
@@ -156,8 +159,8 @@ function btn(active: boolean): React.CSSProperties {
 const divider: React.CSSProperties = {
   width: 1,
   alignSelf: "stretch",
-  background: "rgba(255,255,255,0.12)",
-  margin: "2px 4px",
+  background: "#1783ff",
+  margin: "3px 4px",
 };
 
 type StyleTool = Extract<ToolType, "smart" | "rect" | "arrow" | "text">;
