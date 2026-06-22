@@ -40,6 +40,20 @@ export interface ArrowData {
   labelY?: number;
 }
 
+export type BadgeShape = "square" | "rounded" | "circle";
+
+export interface NumberBadgeStyle {
+  bgColor: string;
+  textColor: string;
+  shape: BadgeShape;
+  fontSize: number;
+}
+
+export interface NumberBadge {
+  value: number;
+  style: NumberBadgeStyle;
+}
+
 export interface Annotation {
   id: string;
   type: ToolType;
@@ -51,6 +65,8 @@ export interface Annotation {
   note?: string;
   arrow?: ArrowData;
   style: AnnotationStyle;
+  // V0.3.0: optional auto-incrementing number badge. Absent means no badge.
+  numberBadge?: NumberBadge;
 }
 
 export interface Selection {
