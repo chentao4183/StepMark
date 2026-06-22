@@ -1,6 +1,7 @@
 import { useToolStyleStore } from "../store/toolStyleStore";
 import { TOOL_STYLE_LIMITS } from "../types/toolStyle";
 import type { ToolType } from "../types/annotation";
+import NumberingControls from "./NumberingControls";
 
 const PRESET_COLORS = ["#ff4757", "#1890ff", "#52c41a", "#faad14", "#722ed1", "#000000", "#ffffff", "#fa8c16"];
 const FONT_OPTIONS = [
@@ -29,6 +30,7 @@ export default function StylePanel({ tool, placement }: Props) {
         bottom: placement === "above" ? 44 : undefined,
         left: 0,
         display: "flex",
+        flexWrap: "wrap",
         alignItems: "center",
         gap: 8,
         padding: "4px 6px",
@@ -40,6 +42,7 @@ export default function StylePanel({ tool, placement }: Props) {
         fontSize: 12,
         zIndex: 51,
         whiteSpace: "nowrap",
+        maxWidth: "calc(100vw - 8px)",
       }}
     >
       {tool === "smart" && (
@@ -68,6 +71,7 @@ export default function StylePanel({ tool, placement }: Props) {
             onChange={(fontSize) => updateTool("smart", { fontSize })}
           />
           <FontSelect value={settings.smart.fontFamily} onChange={(fontFamily) => updateTool("smart", { fontFamily })} />
+          <NumberingControls tool="smart" />
         </>
       )}
       {tool === "rect" && (
@@ -88,6 +92,7 @@ export default function StylePanel({ tool, placement }: Props) {
             ]}
             onChange={(shape) => updateTool("rect", { shape })}
           />
+          <NumberingControls tool="rect" />
         </>
       )}
       {tool === "arrow" && (
@@ -115,6 +120,7 @@ export default function StylePanel({ tool, placement }: Props) {
             max={TOOL_STYLE_LIMITS.arrowHeadSize.max}
             onChange={(arrowHeadSize) => updateTool("arrow", { arrowHeadSize })}
           />
+          <NumberingControls tool="arrow" />
         </>
       )}
       {tool === "text" && (
@@ -128,6 +134,7 @@ export default function StylePanel({ tool, placement }: Props) {
             onChange={(fontSize) => updateTool("text", { fontSize })}
           />
           <FontSelect value={settings.text.fontFamily} onChange={(fontFamily) => updateTool("text", { fontFamily })} />
+          <NumberingControls tool="text" />
         </>
       )}
     </div>
