@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import type Konva from "konva";
+import { applyNumberBadgeIfEnabled } from "../numbering/applyNumbering";
 import { useEditorStore } from "../store/editorStore";
+import { useNumberingStore } from "../store/numberingStore";
 import { useToolStyleStore } from "../store/toolStyleStore";
 import { useToolState } from "../store/toolState";
 import { annotationFieldsFromToolStyle } from "../style/styleMapping";
@@ -39,13 +41,16 @@ export function useRectTool() {
       onMouseUp: () => {
         const r = ts.rectPreview;
         if (r && r.width > 5 && r.height > 5) {
-          const a: Annotation = {
+          const base: Annotation = {
             id: crypto.randomUUID(),
             type: "rect",
             rect: r,
             ...annotationFieldsFromToolStyle("rect", useToolStyleStore.getState().settings),
           };
-          addAnnotation(a);
+          const numberingSettings = useNumberingStore.getState().settings;
+          const nextNumber = useEditorStore.getState().nextNumber;
+          const { annotation, consumed } = applyNumberBadgeIfEnabled("rect", base, numberingSettings, nextNumber);
+          addAnnotation(annotation, { consumedNumber: consumed });
         }
         startRef.current = null;
         ts.setRectPreview(null);

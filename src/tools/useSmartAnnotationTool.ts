@@ -2,7 +2,9 @@ import { useRef } from "react";
 import type Konva from "konva";
 import { smartArrowStart } from "../geometry/arrowAnchor";
 import { labelSide, labelVerticalAnchor } from "../geometry/labelBox";
+import { applyNumberBadgeIfEnabled } from "../numbering/applyNumbering";
 import { useEditorStore } from "../store/editorStore";
+import { useNumberingStore } from "../store/numberingStore";
 import { useToolStyleStore } from "../store/toolStyleStore";
 import { useToolState } from "../store/toolState";
 import { annotationFieldsFromToolStyle } from "../style/styleMapping";
@@ -100,7 +102,7 @@ export function useSmartAnnotationTool() {
     if (rect && arrowStart && arrowEnd && labelAnchor && text.trim()) {
       const settings = useToolStyleStore.getState().settings;
       const fields = annotationFieldsFromToolStyle("smart", settings);
-      const a: Annotation = {
+      const base: Annotation = {
         id: crypto.randomUUID(),
         type: "smart",
         rect,
@@ -115,7 +117,10 @@ export function useSmartAnnotationTool() {
           labelY: labelAnchor.y,
         },
       };
-      addAnnotation(a);
+      const numberingSettings = useNumberingStore.getState().settings;
+      const nextNumber = useEditorStore.getState().nextNumber;
+      const { annotation, consumed } = applyNumberBadgeIfEnabled("smart", base, numberingSettings, nextNumber);
+      addAnnotation(annotation, { consumedNumber: consumed });
     }
     reset();
   }
