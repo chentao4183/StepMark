@@ -1,5 +1,9 @@
 import { Arrow } from "react-konva";
+import { measureBadgeTextWidth } from "../badgeText";
+import NumberBadgeShape from "./NumberBadgeShape";
+import { arrowBadgeBox, measureNumberBadge } from "../../geometry/numberBadge";
 import { useEditorStore } from "../../store/editorStore";
+import { useNumberingStore } from "../../store/numberingStore";
 import type { Annotation } from "../../types/annotation";
 
 interface Props {
@@ -11,6 +15,8 @@ export default function ArrowShape({ a, selectable = false }: Props) {
   const selectedId = useEditorStore((s) => s.selectedId);
   const select = useEditorStore((s) => s.selectAnnotation);
   const update = useEditorStore((s) => s.updateAnnotation);
+  const crop = useEditorStore((s) => s.cropRegion);
+  const arrowPlacement = useNumberingStore((s) => s.settings.positionByTool.arrow);
   const isSelected = selectable && selectedId === a.id;
 
   if (!a.arrow) return null;
@@ -23,6 +29,13 @@ export default function ArrowShape({ a, selectable = false }: Props) {
     : [a.arrow.endX, a.arrow.endY, a.arrow.endX, a.arrow.endY];
   const headSize = a.arrowHeadSize ?? 10;
   const dash = a.lineStyle === "dashed" ? [10, 6] : undefined;
+
+  const badge = a.numberBadge
+    ? (() => {
+        const size = measureNumberBadge(a.numberBadge!.value, a.numberBadge!.style, measureBadgeTextWidth);
+        return arrowBadgeBox(a.arrow!, size, arrowPlacement, crop);
+      })()
+    : null;
 
   return (
     <>
@@ -74,6 +87,7 @@ export default function ArrowShape({ a, selectable = false }: Props) {
           listening={false}
         />
       )}
+      {badge && <NumberBadgeShape badge={a.numberBadge!} box={badge} />}
     </>
   );
 }

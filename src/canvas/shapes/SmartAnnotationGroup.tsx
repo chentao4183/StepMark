@@ -1,7 +1,13 @@
 import { Arrow, Ellipse, Group, Rect } from "react-konva";
 import { cornerPoint } from "../../geometry/corners";
+import { measureNumberBadge, smartBadgeBox } from "../../geometry/numberBadge";
+import { resolveLabelBox } from "../../geometry/smartLabelBox";
 import { useEditorStore } from "../../store/editorStore";
+import { useNumberingStore } from "../../store/numberingStore";
 import type { Annotation } from "../../types/annotation";
+import { measureBadgeTextWidth } from "../badgeText";
+import { labelBoxSize } from "../labelMetrics";
+import NumberBadgeShape from "./NumberBadgeShape";
 import TextLabelShape from "./TextLabelShape";
 
 interface Props {
@@ -14,6 +20,8 @@ export default function SmartAnnotationGroup({ a, selectable = false, onEditText
   const selectedId = useEditorStore((s) => s.selectedId);
   const select = useEditorStore((s) => s.selectAnnotation);
   const update = useEditorStore((s) => s.updateAnnotation);
+  const crop = useEditorStore((s) => s.cropRegion);
+  const smartPlacement = useNumberingStore((s) => s.settings.positionByTool.smart);
   const isSelected = selectable && selectedId === a.id;
 
   const start =
@@ -23,6 +31,25 @@ export default function SmartAnnotationGroup({ a, selectable = false, onEditText
         ? cornerPoint(a.rect, a.arrow.startCorner)
         : null;
   const headSize = a.arrowHeadSize ?? 10;
+
+  // Compute the smart badge box using the same label metrics/positioning path as
+  // the label itself, so the anchor follows the rendered visual label box.
+  let badgeBox = null;
+  if (a.numberBadge && a.arrow) {
+    const labelText = a.note ?? "";
+    const { width: labelW, height: labelH } = labelBoxSize(labelText, a.style, a.fontFamily);
+    const labelX = a.arrow.labelX ?? a.arrow.endX;
+    const labelY = a.arrow.labelY ?? a.arrow.endY;
+    const { boxX, boxY } = resolveLabelBox(a, labelX, labelY, labelW, labelH);
+    const size = measureNumberBadge(a.numberBadge.value, a.numberBadge.style, measureBadgeTextWidth);
+    badgeBox = smartBadgeBox(
+      a,
+      smartPlacement,
+      { x: boxX, y: boxY, width: labelW, height: labelH },
+      size,
+      crop,
+    );
+  }
 
   return (
     <Group
@@ -60,6 +87,8 @@ export default function SmartAnnotationGroup({ a, selectable = false, onEditText
         />
       )}
       <TextLabelShape a={a} selectable={selectable} onEditText={onEditText} />
+
+      {badgeBox && a.numberBadge && <NumberBadgeShape badge={a.numberBadge} box={badgeBox} />}
 
       {isSelected && a.rect && (
         <>

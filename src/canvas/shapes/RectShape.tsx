@@ -1,5 +1,9 @@
 import { Ellipse, Rect } from "react-konva";
+import { measureBadgeTextWidth } from "../badgeText";
+import NumberBadgeShape from "./NumberBadgeShape";
+import { ellipseBadgeBox, measureNumberBadge, rectBadgeBox } from "../../geometry/numberBadge";
 import { useEditorStore } from "../../store/editorStore";
+import { useNumberingStore } from "../../store/numberingStore";
 import type { Annotation } from "../../types/annotation";
 
 interface Props {
@@ -11,6 +15,8 @@ export default function RectShape({ a, selectable = false }: Props) {
   const selectedId = useEditorStore((s) => s.selectedId);
   const select = useEditorStore((s) => s.selectAnnotation);
   const update = useEditorStore((s) => s.updateAnnotation);
+  const crop = useEditorStore((s) => s.cropRegion);
+  const rectPlacement = useNumberingStore((s) => s.settings.positionByTool.rect);
   const isSelected = selectable && selectedId === a.id;
 
   if (!a.rect) return null;
@@ -28,6 +34,19 @@ export default function RectShape({ a, selectable = false }: Props) {
       listening={false}
     />
   ) : null;
+
+  const badge =
+    a.numberBadge && shape === "ellipse"
+      ? (() => {
+          const size = measureNumberBadge(a.numberBadge!.value, a.numberBadge!.style, measureBadgeTextWidth);
+          return ellipseBadgeBox(a.rect!, size, rectPlacement.ellipsePosition, crop);
+        })()
+      : a.numberBadge
+        ? (() => {
+            const size = measureNumberBadge(a.numberBadge!.value, a.numberBadge!.style, measureBadgeTextWidth);
+            return rectBadgeBox(a.rect!, size, rectPlacement.rectPosition, crop);
+          })()
+        : null;
 
   if (shape === "ellipse") {
     return (
@@ -57,6 +76,7 @@ export default function RectShape({ a, selectable = false }: Props) {
           }}
         />
         {selectionBox}
+        {badge && <NumberBadgeShape badge={a.numberBadge!} box={badge} />}
       </>
     );
   }
@@ -88,6 +108,7 @@ export default function RectShape({ a, selectable = false }: Props) {
         }}
       />
       {selectionBox}
+      {badge && <NumberBadgeShape badge={a.numberBadge!} box={badge} />}
     </>
   );
 }
