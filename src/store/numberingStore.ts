@@ -20,7 +20,10 @@ import {
   type TextBadgePosition,
 } from "../types/numbering";
 
-export const NUMBERING_STORAGE_KEY = "snapnote.numbering.v1";
+export const NUMBERING_STORAGE_KEY = "stepmark.numbering.v1";
+
+// Previous name (pre-rename). Kept only to migrate existing users once.
+const LEGACY_NUMBERING_STORAGE_KEY = "snapnote.numbering.v1";
 
 interface NumberingState {
   settings: NumberingSettings;
@@ -36,6 +39,7 @@ interface NumberingState {
 
 export function loadNumberingSettings(): NumberingSettings {
   try {
+    migrateLegacyKey();
     const raw = getStorage()?.getItem(NUMBERING_STORAGE_KEY);
     if (!raw) return cloneDefaults();
     const parsed = JSON.parse(raw);
@@ -161,6 +165,25 @@ function persist(settings: NumberingSettings) {
     getStorage()?.setItem(NUMBERING_STORAGE_KEY, JSON.stringify(settings));
   } catch (error) {
     console.warn("Failed to persist numbering settings", error);
+  }
+}
+
+/**
+ * One-time migration from the pre-rename key (snapnote → stepmark).
+ * If the legacy key exists and the new key does not, copy it over and remove the legacy key.
+ */
+function migrateLegacyKey(): void {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    const legacy = storage.getItem(LEGACY_NUMBERING_STORAGE_KEY);
+    if (!legacy) return;
+    if (storage.getItem(NUMBERING_STORAGE_KEY) == null) {
+      storage.setItem(NUMBERING_STORAGE_KEY, legacy);
+    }
+    storage.removeItem(LEGACY_NUMBERING_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Failed to migrate legacy numbering key", error);
   }
 }
 

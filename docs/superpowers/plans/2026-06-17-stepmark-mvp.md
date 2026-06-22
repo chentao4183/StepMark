@@ -1,4 +1,4 @@
-# SnapNote MVP Implementation Plan
+# StepMark MVP Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -8,14 +8,14 @@
 
 **Tech Stack:** Tauri 2.x · Rust 1.95 · React 18 · TypeScript · Vite · Konva.js (react-konva) · Zustand · xcap crate · tauri-plugin-global-shortcut · tauri-plugin-clipboard-manager · tauri-plugin-dialog
 
-**Spec:** `docs/superpowers/specs/2026-06-17-snapnote-design.md`
+**Spec:** `docs/superpowers/specs/2026-06-17-stepmark-design.md`
 
 ---
 
 ## File Structure
 
 ```
-SnapNote/
+StepMark/
 ├── docs/superpowers/{specs,plans}/            ← docs (already exist)
 ├── package.json                               ← npm manifest
 ├── vite.config.ts                             ← multi-page build (main/selector/editor)
@@ -99,7 +99,7 @@ SnapNote/
 - [ ] **Step 1: Initialize git repo**
 
 ```bash
-cd D:\SnapNote
+cd D:\StepMark
 git init
 git config core.autocrlf true
 ```
@@ -109,16 +109,16 @@ git config core.autocrlf true
 We can't use `npm create tauri-app` interactively. Use the CLI flags:
 
 ```bash
-cd D:\SnapNote
-npm create tauri-app@latest . -- --template react-ts --manager npm --name SnapNote --identifier com.snapnote.app
+cd D:\StepMark
+npm create tauri-app@latest . -- --template react-ts --manager npm --name StepMark --identifier com.stepmark.app
 ```
 
 If the interactive prompt still blocks, fall back to creating in a temp dir and moving files:
 
 ```bash
-cd D:\SnapNote
-npm create tauri-app@latest snapnote-tmp -- --template react-ts --manager npm --name SnapNote --identifier com.snapnote.app
-# then move all files from snapnote-tmp up one level, delete snapnote-tmp
+cd D:\StepMark
+npm create tauri-app@latest stepmark-tmp -- --template react-ts --manager npm --name StepMark --identifier com.stepmark.app
+# then move all files from stepmark-tmp up one level, delete stepmark-tmp
 ```
 
 Expected: project now has `package.json`, `src/`, `src-tauri/`, `index.html`, `vite.config.ts`, `tsconfig.json`.
@@ -134,7 +134,7 @@ Expected: A Tauri window opens showing the default React welcome page. Close it 
 
 - [ ] **Step 4: Write `.gitignore`**
 
-Create `D:\SnapNote\.gitignore`:
+Create `D:\StepMark\.gitignore`:
 
 ```gitignore
 # Dependencies
@@ -216,7 +216,7 @@ export default defineConfig({
 
 - [ ] **Step 3: Create selector and editor HTML entries**
 
-Create `D:\SnapNote\selector.html`:
+Create `D:\StepMark\selector.html`:
 
 ```html
 <!doctype html>
@@ -224,7 +224,7 @@ Create `D:\SnapNote\selector.html`:
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SnapNote Selector</title>
+    <title>StepMark Selector</title>
   </head>
   <body>
     <div id="root"></div>
@@ -233,7 +233,7 @@ Create `D:\SnapNote\selector.html`:
 </html>
 ```
 
-Create `D:\SnapNote\editor.html` (identical except title and script):
+Create `D:\StepMark\editor.html` (identical except title and script):
 
 ```html
 <!doctype html>
@@ -241,7 +241,7 @@ Create `D:\SnapNote\editor.html` (identical except title and script):
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SnapNote Editor</title>
+    <title>StepMark Editor</title>
   </head>
   <body>
     <div id="root"></div>
@@ -252,7 +252,7 @@ Create `D:\SnapNote\editor.html` (identical except title and script):
 
 - [ ] **Step 4: Create selector/editor React roots (placeholder)**
 
-Create `D:\SnapNote\src\selector.tsx`:
+Create `D:\StepMark\src\selector.tsx`:
 
 ```typescript
 import React from "react";
@@ -269,7 +269,7 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-Create `D:\SnapNote\src\editor.tsx`:
+Create `D:\StepMark\src\editor.tsx`:
 
 ```typescript
 import React from "react";
@@ -286,7 +286,7 @@ createRoot(document.getElementById("root")!).render(
 );
 ```
 
-Also add global CSS to remove body margins in all three windows. Create `D:\SnapNote\src\global.css`:
+Also add global CSS to remove body margins in all three windows. Create `D:\StepMark\src\global.css`:
 
 ```css
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -336,7 +336,7 @@ base64 = "0.22"
 
 - [ ] **Step 2: Write the screenshot command**
 
-Create `D:\SnapNote\src-tauri\src\commands\mod.rs`:
+Create `D:\StepMark\src-tauri\src\commands\mod.rs`:
 
 ```rust
 pub mod screenshot;
@@ -344,7 +344,7 @@ pub mod clipboard;
 pub mod save;
 ```
 
-Create `D:\SnapNote\src-tauri\src\commands\screenshot.rs`:
+Create `D:\StepMark\src-tauri\src\commands\screenshot.rs`:
 
 ```rust
 use base64::Engine;
@@ -453,7 +453,7 @@ cd ..
 
 - [ ] **Step 2: Write the tray module**
 
-Create `D:\SnapNote\src-tauri\src\tray.rs`:
+Create `D:\StepMark\src-tauri\src\tray.rs`:
 
 ```rust
 use tauri::{
@@ -572,7 +572,7 @@ git commit -m "feat: global F1 hotkey + system tray"
 
 - [ ] **Step 1: Clipboard command**
 
-Create `D:\SnapNote\src-tauri\src\commands\clipboard.rs`:
+Create `D:\StepMark\src-tauri\src\commands\clipboard.rs`:
 
 ```rust
 use base64::Engine;
@@ -596,7 +596,7 @@ pub fn copy_image_to_clipboard(app: tauri::AppHandle, data_url: String) -> Resul
 
 - [ ] **Step 2: Save command**
 
-Create `D:\SnapNote\src-tauri\src\commands\save.rs`:
+Create `D:\StepMark\src-tauri\src\commands\save.rs`:
 
 ```rust
 use base64::Engine;
@@ -687,7 +687,7 @@ In `src-tauri/tauri.conf.json`, under `"app" > "windows"`, add two entries (main
 ```json
 {
   "label": "selector",
-  "title": "SnapNote",
+  "title": "StepMark",
   "url": "selector.html",
   "width": 1920,
   "height": 1080,
@@ -701,7 +701,7 @@ In `src-tauri/tauri.conf.json`, under `"app" > "windows"`, add two entries (main
 },
 {
   "label": "editor",
-  "title": "SnapNote Editor",
+  "title": "StepMark Editor",
   "url": "editor.html",
   "width": 1920,
   "height": 1080,
@@ -716,7 +716,7 @@ In `src-tauri/tauri.conf.json`, under `"app" > "windows"`, add two entries (main
 
 - [ ] **Step 2: Write the core types**
 
-Create `D:\SnapNote\src\types\annotation.ts`:
+Create `D:\StepMark\src\types\annotation.ts`:
 
 ```typescript
 export type ToolType = "smart" | "rect" | "arrow" | "text" | "mosaic";
@@ -775,7 +775,7 @@ export interface Selection {
 
 - [ ] **Step 3: Write the IPC bridge**
 
-Create `D:\SnapNote\src\ipc\bridge.ts`:
+Create `D:\StepMark\src\ipc\bridge.ts`:
 
 ```typescript
 import { invoke } from "@tauri-apps/api/core";
@@ -861,7 +861,7 @@ git commit -m "feat: multi-window config + IPC bridge + core types"
 
 - [ ] **Step 1: Write the SelectorWindow component**
 
-Create `D:\SnapNote\src\windows\SelectorWindow.tsx`:
+Create `D:\StepMark\src\windows\SelectorWindow.tsx`:
 
 ```typescript
 import { useEffect, useRef, useState } from "react";
@@ -1069,7 +1069,7 @@ export default function SelectorWindow() {
 
 - [ ] **Step 2: Wire SelectorWindow into selector.tsx**
 
-Replace `D:\SnapNote\src\selector.tsx` with:
+Replace `D:\StepMark\src\selector.tsx` with:
 
 ```typescript
 import React from "react";
@@ -1086,7 +1086,7 @@ createRoot(document.getElementById("root")!).render(
 
 - [ ] **Step 3: Wire the F1 → selector window trigger**
 
-In `D:\SnapNote\src\main.tsx`, replace its body to:
+In `D:\StepMark\src\main.tsx`, replace its body to:
 
 ```typescript
 import React, { useEffect } from "react";
@@ -1103,7 +1103,7 @@ function MainApp() {
       unlisten.then((fn) => fn());
     };
   }, []);
-  return <div style={{ padding: 24, fontFamily: "system-ui" }}>SnapNote is running in the background. Press F1 to capture.</div>;
+  return <div style={{ padding: 24, fontFamily: "system-ui" }}>StepMark is running in the background. Press F1 to capture.</div>;
 }
 
 createRoot(document.getElementById("root")!).render(
@@ -1146,7 +1146,7 @@ git commit -m "feat: screenshot selector window with drag-to-select"
 
 - [ ] **Step 1: Write the Zustand store**
 
-Create `D:\SnapNote\src\store\editorStore.ts`:
+Create `D:\StepMark\src\store\editorStore.ts`:
 
 ```typescript
 import { create } from "zustand";
@@ -1250,7 +1250,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
 
 - [ ] **Step 2: Write the EditorWindow shell**
 
-Create `D:\SnapNote\src\windows\EditorWindow.tsx`:
+Create `D:\StepMark\src\windows\EditorWindow.tsx`:
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -1306,7 +1306,7 @@ export default function EditorWindow() {
 
 - [ ] **Step 3: Create stub EditorStage and Toolbar so it compiles**
 
-Create `D:\SnapNote\src\canvas\EditorStage.tsx`:
+Create `D:\StepMark\src\canvas\EditorStage.tsx`:
 
 ```typescript
 import { Stage, Layer, Image as KonvaImage } from "react-konva";
@@ -1328,7 +1328,7 @@ export default function EditorStage() {
 }
 ```
 
-Create `D:\SnapNote\src\components\Toolbar.tsx` (stub):
+Create `D:\StepMark\src\components\Toolbar.tsx` (stub):
 
 ```typescript
 export default function Toolbar() {
@@ -1342,7 +1342,7 @@ export default function Toolbar() {
 
 - [ ] **Step 4: Wire editor.tsx**
 
-Replace `D:\SnapNote\src\editor.tsx` with:
+Replace `D:\StepMark\src\editor.tsx` with:
 
 ```typescript
 import React from "react";
@@ -1389,7 +1389,7 @@ git commit -m "feat: editor window scaffold + Zustand store"
 
 - [ ] **Step 1: Geometry helper — corner resolution**
 
-Create `D:\SnapNote\src\geometry\corners.ts`:
+Create `D:\StepMark\src\geometry\corners.ts`:
 
 ```typescript
 import type { Corner, Rect } from "../types/annotation";
@@ -1423,7 +1423,7 @@ export function nearestCorner(rect: Rect, p: Point): Corner {
 
 - [ ] **Step 2: RectShape**
 
-Create `D:\SnapNote\src\canvas\shapes\RectShape.tsx`:
+Create `D:\StepMark\src\canvas\shapes\RectShape.tsx`:
 
 ```typescript
 import { Rect } from "react-konva";
@@ -1447,7 +1447,7 @@ export default function RectShape({ a }: { a: Annotation }) {
 
 - [ ] **Step 3: ArrowShape**
 
-Create `D:\SnapNote\src\canvas\shapes\ArrowShape.tsx`:
+Create `D:\StepMark\src\canvas\shapes\ArrowShape.tsx`:
 
 ```typescript
 import { Arrow, Line } from "react-konva";
@@ -1479,7 +1479,7 @@ export default function ArrowShape({ a }: { a: Annotation }) {
 
 - [ ] **Step 4: TextLabelShape**
 
-Create `D:\SnapNote\src\canvas\shapes\TextLabelShape.tsx`:
+Create `D:\StepMark\src\canvas\shapes\TextLabelShape.tsx`:
 
 ```typescript
 import { Rect, Text } from "react-konva";
@@ -1525,7 +1525,7 @@ export default function TextLabelShape({ a }: { a: Annotation }) {
 
 - [ ] **Step 5: MosaicShape**
 
-Create `D:\SnapNote\src\canvas\shapes\MosaicShape.tsx`:
+Create `D:\StepMark\src\canvas\shapes\MosaicShape.tsx`:
 
 ```typescript
 import { Image as KonvaImage } from "react-konva";
@@ -1572,7 +1572,7 @@ export default function MosaicShape({ a }: { a: Annotation }) {
 
 - [ ] **Step 6: SmartAnnotationGroup**
 
-Create `D:\SnapNote\src\canvas\shapes\SmartAnnotationGroup.tsx`:
+Create `D:\StepMark\src\canvas\shapes\SmartAnnotationGroup.tsx`:
 
 ```typescript
 import { Group } from "react-konva";
@@ -1594,7 +1594,7 @@ export default function SmartAnnotationGroup({ a }: { a: Annotation }) {
 
 - [ ] **Step 7: AnnotationLayer dispatcher**
 
-Create `D:\SnapNote\src\canvas\layers\AnnotationLayer.tsx`:
+Create `D:\StepMark\src\canvas\layers\AnnotationLayer.tsx`:
 
 ```typescript
 import { Layer } from "react-konva";
@@ -1633,7 +1633,7 @@ export default function AnnotationLayer() {
 
 - [ ] **Step 8: Render AnnotationLayer in EditorStage**
 
-Replace `D:\SnapNote\src\canvas\EditorStage.tsx` with:
+Replace `D:\StepMark\src\canvas\EditorStage.tsx` with:
 
 ```typescript
 import { Stage, Layer, Image as KonvaImage } from "react-konva";
@@ -1710,7 +1710,7 @@ Add to `package.json` scripts:
 
 - [ ] **Step 2: Write the test**
 
-Create `D:\SnapNote\src\geometry\corners.test.ts`:
+Create `D:\StepMark\src\geometry\corners.test.ts`:
 
 ```typescript
 import { describe, it, expect } from "vitest";
@@ -1781,7 +1781,7 @@ git commit -m "test: nearest-corner geometry algorithm"
 
 - [ ] **Step 1: TextInputOverlay**
 
-Create `D:\SnapNote\src\components\TextInputOverlay.tsx`:
+Create `D:\StepMark\src\components\TextInputOverlay.tsx`:
 
 ```typescript
 import { useEffect, useRef } from "react";
@@ -1838,7 +1838,7 @@ export default function TextInputOverlay({ x, y, initial, onSubmit, onCancel }: 
 
 - [ ] **Step 2: Smart annotation tool hook**
 
-Create `D:\SnapNote\src\tools\useSmartAnnotationTool.ts`:
+Create `D:\StepMark\src\tools\useSmartAnnotationTool.ts`:
 
 ```typescript
 import { useRef, useState } from "react";
@@ -1963,7 +1963,7 @@ export function useSmartAnnotationTool() {
 
 - [ ] **Step 3: Wire the tool into EditorStage with preview rendering**
 
-Replace `D:\SnapNote\src\canvas\EditorStage.tsx`:
+Replace `D:\StepMark\src\canvas\EditorStage.tsx`:
 
 ```typescript
 import { Stage, Layer, Image as KonvaImage, Rect, Arrow } from "react-konva";
@@ -2029,7 +2029,7 @@ export default function EditorStage() {
 
 - [ ] **Step 4: Wire TextInputOverlay into EditorWindow**
 
-Replace `D:\SnapNote\src\windows\EditorWindow.tsx`:
+Replace `D:\StepMark\src\windows\EditorWindow.tsx`:
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -2129,7 +2129,7 @@ git commit -m "feat: smart annotation 5-step state machine"
 
 - [ ] **Step 1: useRectTool**
 
-Create `D:\SnapNote\src\tools\useRectTool.ts`:
+Create `D:\StepMark\src\tools\useRectTool.ts`:
 
 ```typescript
 import { useRef, useState } from "react";
@@ -2175,7 +2175,7 @@ export function useRectTool() {
 
 - [ ] **Step 2: useArrowTool** (two-segment: down=start, up=end)
 
-Create `D:\SnapNote\src\tools\useArrowTool.ts`:
+Create `D:\StepMark\src\tools\useArrowTool.ts`:
 
 ```typescript
 import { useRef, useState } from "react";
@@ -2225,7 +2225,7 @@ export function useArrowTool() {
 
 - [ ] **Step 3: useTextTool** (click → text overlay at click → submit creates a standalone text label)
 
-Create `D:\SnapNote\src\tools\useTextTool.ts`:
+Create `D:\StepMark\src\tools\useTextTool.ts`:
 
 ```typescript
 import { useState } from "react";
@@ -2271,7 +2271,7 @@ export function useTextTool() {
 
 - [ ] **Step 4: useMosaicTool**
 
-Create `D:\SnapNote\src\tools\useMosaicTool.ts`:
+Create `D:\StepMark\src\tools\useMosaicTool.ts`:
 
 ```typescript
 import { useRef, useState } from "react";
@@ -2317,7 +2317,7 @@ export function useMosaicTool() {
 
 - [ ] **Step 5: Tool dispatcher hook**
 
-Create `D:\SnapNote\src\tools\index.ts`:
+Create `D:\StepMark\src\tools\index.ts`:
 
 ```typescript
 import { useEditorStore } from "../store/editorStore";
@@ -2350,7 +2350,7 @@ export function useActiveTool() {
 
 - [ ] **Step 6: Refactor EditorStage to use the dispatcher**
 
-Replace `D:\SnapNote\src\canvas\EditorStage.tsx`:
+Replace `D:\StepMark\src\canvas\EditorStage.tsx`:
 
 ```typescript
 import { Stage, Layer, Image as KonvaImage, Rect, Arrow } from "react-konva";
@@ -2422,7 +2422,7 @@ export default function EditorStage() {
 
 - [ ] **Step 7: Refactor EditorWindow to handle all tools' text overlays**
 
-Replace `D:\SnapNote\src\windows\EditorWindow.tsx`:
+Replace `D:\StepMark\src\windows\EditorWindow.tsx`:
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -2498,7 +2498,7 @@ function cropped_placeholder(): never { throw new Error("remove this"); }
 
 - [ ] **Step 8: Remove the placeholder bug from EditorWindow**
 
-In `D:\SnapNote\src\windows\EditorWindow.tsx`, the onload body should read exactly:
+In `D:\StepMark\src\windows\EditorWindow.tsx`, the onload body should read exactly:
 
 ```typescript
 img.onload = () => {
@@ -2543,7 +2543,7 @@ git commit -m "feat: rect/arrow/text/mosaic tools + dispatcher"
 
 - [ ] **Step 1: Make SmartAnnotationGroup interactive & draggable**
 
-Replace `D:\SnapNote\src\canvas\shapes\SmartAnnotationGroup.tsx`:
+Replace `D:\StepMark\src\canvas\shapes\SmartAnnotationGroup.tsx`:
 
 ```typescript
 import { Group, Rect } from "react-konva";
@@ -2599,7 +2599,7 @@ export default function SmartAnnotationGroup({ a }: { a: Annotation }) {
 
 - [ ] **Step 2: Make simple shapes (rect/arrow/mosaic) selectable**
 
-Update `D:\SnapNote\src\canvas\shapes\RectShape.tsx`:
+Update `D:\StepMark\src\canvas\shapes\RectShape.tsx`:
 
 ```typescript
 import { Group, Rect } from "react-konva";
@@ -2638,7 +2638,7 @@ Apply the same pattern to `ArrowShape.tsx` (wrap in a Group; on dragEnd, update 
 
 - [ ] **Step 3: Background click clears selection**
 
-In `D:\SnapNote\src\canvas\EditorStage.tsx`, add an `onMouseDown` on the Stage that, if the target is the Stage itself (not a shape), clears selection:
+In `D:\StepMark\src\canvas\EditorStage.tsx`, add an `onMouseDown` on the Stage that, if the target is the Stage itself (not a shape), clears selection:
 
 ```typescript
 onMouseDown={(e) => {
@@ -2652,7 +2652,7 @@ onMouseDown={(e) => {
 
 - [ ] **Step 4: Keyboard handler for Delete + double-click edit**
 
-In `D:\SnapNote\src\windows\EditorWindow.tsx`, add a `useEffect`:
+In `D:\StepMark\src\windows\EditorWindow.tsx`, add a `useEffect`:
 
 ```typescript
 useEffect(() => {
@@ -2786,7 +2786,7 @@ git commit -m "feat: undo/redo keyboard shortcuts"
 
 - [ ] **Step 1: Export utility**
 
-Create `D:\SnapNote\src\export\exportImage.ts`:
+Create `D:\StepMark\src\export\exportImage.ts`:
 
 ```typescript
 import { useEditorStore } from "../store/editorStore";
@@ -2815,7 +2815,7 @@ useEffect(() => {
 
 - [ ] **Step 2: Toolbar component**
 
-Replace `D:\SnapNote\src\components\Toolbar.tsx`:
+Replace `D:\StepMark\src\components\Toolbar.tsx`:
 
 ```typescript
 import { useState } from "react";
@@ -2858,7 +2858,7 @@ export default function Toolbar() {
 
   async function onSave() {
     const path = await save({
-      defaultPath: "snapnote.png",
+      defaultPath: "stepmark.png",
       filters: [{ name: "PNG", extensions: ["png"] }, { name: "JPG", extensions: ["jpg", "jpeg"] }],
     });
     if (!path) return;
@@ -2980,14 +2980,14 @@ git commit -m "feat: esc cancels + window lifecycle"
 
 - [ ] **Step 1: Rust autostart command**
 
-Create `D:\SnapNote\src-tauri\src\autostart.rs`:
+Create `D:\StepMark\src-tauri\src\autostart.rs`:
 
 ```rust
 use winreg::enums::*;
 use winreg::RegKey;
 
 const RUN_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
-const APP_NAME: &str = "SnapNote";
+const APP_NAME: &str = "StepMark";
 
 #[tauri::command]
 pub fn set_autostart(enabled: bool) -> Result<(), String> {
@@ -3022,12 +3022,12 @@ autostart::set_autostart,
 
 - [ ] **Step 2: FirstRunCard component**
 
-Create `D:\SnapNote\src\components\FirstRunCard.tsx`:
+Create `D:\StepMark\src\components\FirstRunCard.tsx`:
 
 ```typescript
 import { invoke } from "@tauri-apps/api/core";
 
-const KEY = "snapnote.hasShownAutostartPrompt";
+const KEY = "stepmark.hasShownAutostartPrompt";
 
 export function shouldShowFirstRun(): boolean {
   return localStorage.getItem(KEY) === null;
@@ -3044,7 +3044,7 @@ export default function FirstRunCard() {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div style={{ background: "white", padding: 24, borderRadius: 8, maxWidth: 380, fontFamily: "system-ui" }}>
-        <h3 style={{ marginBottom: 8 }}>欢迎使用 SnapNote</h3>
+        <h3 style={{ marginBottom: 8 }}>欢迎使用 StepMark</h3>
         <p style={{ color: "#555", marginBottom: 16, fontSize: 14 }}>是否开机自动启动？按 F1 随时截图。</p>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <button onClick={() => respond(false)} style={{ padding: "6px 16px", border: "1px solid #ccc", background: "white", cursor: "pointer" }}>否</button>
@@ -3058,7 +3058,7 @@ export default function FirstRunCard() {
 
 - [ ] **Step 3: Show main window on first run, render card**
 
-Create `D:\SnapNote\src\windows\MainWindow.tsx`:
+Create `D:\StepMark\src\windows\MainWindow.tsx`:
 
 ```typescript
 import { useEffect, useState } from "react";
@@ -3082,7 +3082,7 @@ export default function MainWindow() {
 
   return (
     <div style={{ padding: 24, fontFamily: "system-ui" }}>
-      <h2>SnapNote</h2>
+      <h2>StepMark</h2>
       <p>正在后台运行。按 F1 截图。</p>
     </div>
   );
@@ -3140,8 +3140,8 @@ In `src-tauri/tauri.conf.json`, ensure under `"bundle"`:
 "bundle": {
   "active": true,
   "targets": ["nsis"],
-  "productName": "SnapNote",
-  "identifier": "com.snapnote.app",
+  "productName": "StepMark",
+  "identifier": "com.stepmark.app",
   "icon": ["icons/icon.ico"],
   "windows": {
     "nsis": {
@@ -3170,8 +3170,8 @@ npm run tauri build
 
 Expected output:
 ```
-src-tauri/target/release/SnapNote.exe                  (~10MB)
-src-tauri/target/release/bundle/nsis/SnapNote_1.0.0_x64-setup.exe  (~5MB)
+src-tauri/target/release/StepMark.exe                  (~10MB)
+src-tauri/target/release/bundle/nsis/StepMark_1.0.0_x64-setup.exe  (~5MB)
 ```
 
 - [ ] **Step 4: Install & run acceptance checklist**
@@ -3203,4 +3203,4 @@ git tag v0.1.0-mvp
 
 ## Done
 
-SnapNote MVP is complete and packaged. The spec's §12 second-phase features (`.md` export, AI analysis) build on the existing `annotations[]` data model without architectural changes.
+StepMark MVP is complete and packaged. The spec's §12 second-phase features (`.md` export, AI analysis) build on the existing `annotations[]` data model without architectural changes.

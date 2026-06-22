@@ -1,4 +1,4 @@
-# SnapNote 设计文档
+# StepMark 设计文档
 
 - **状态**：Draft（待用户评审）
 - **日期**：2026-06-17
@@ -9,7 +9,7 @@
 
 ## 1. 项目概述
 
-SnapNote 是一款 **Windows 桌面截图批注工具**，定位对标 [Snipaste](https://zh.snipaste.com/)，核心差异化卖点是 **「智能标注」工具**：用户框选一个区域后，一步生成「红框 + 箭头 + 文字标签」组合，无需像传统工具那样分别切换矩形/箭头/文字工具。
+StepMark 是一款 **Windows 桌面截图批注工具**，定位对标 [Snipaste](https://zh.snipaste.com/)，核心差异化卖点是 **「智能标注」工具**：用户框选一个区域后，一步生成「红框 + 箭头 + 文字标签」组合，无需像传统工具那样分别切换矩形/箭头/文字工具。
 
 目标用户场景：
 - 日常截图反馈问题（产品/UI/实施验收）
@@ -156,7 +156,7 @@ Rust: 写入剪贴板 / 写文件
 
 ## 5. 核心交互设计 —— 智能标注
 
-这是 SnapNote 区别于 Snipaste 的核心，必须实现精确。
+这是 StepMark 区别于 Snipaste 的核心，必须实现精确。
 
 ### 5.1 完整状态机
 
@@ -362,10 +362,10 @@ async fn set_autostart(enabled: bool) -> Result<(), String>;
 ## 10. 目录结构
 
 ```
-SnapNote/
+StepMark/
 ├── docs/
 │   └── superpowers/specs/
-│       └── 2026-06-17-snapnote-design.md     ← 本文档
+│       └── 2026-06-17-stepmark-design.md     ← 本文档
 ├── src/                                        ← 前端
 │   ├── main.tsx
 │   ├── App.tsx
@@ -427,9 +427,9 @@ Tauri 自动：① `cargo build --release` ② `vite build` ③ 前端嵌入 exe
 
 ```
 src-tauri/target/release/
-├── SnapNote.exe                                 ← 主程序 ~10MB（前端已嵌入）
+├── StepMark.exe                                 ← 主程序 ~10MB（前端已嵌入）
 └── bundle/nsis/
-    └── SnapNote_1.0.0_x64-setup.exe             ← 安装包 ~5MB
+    └── StepMark_1.0.0_x64-setup.exe             ← 安装包 ~5MB
 ```
 
 ### 11.3 运行依赖
@@ -440,7 +440,7 @@ src-tauri/target/release/
 ### 11.4 发布方式
 
 - 安装版：分发 setup.exe
-- 绿色版：分发单文件 SnapNote.exe
+- 绿色版：分发单文件 StepMark.exe
 
 ---
 

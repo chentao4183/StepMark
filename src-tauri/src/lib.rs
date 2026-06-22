@@ -1,4 +1,5 @@
 mod commands;
+mod migrate;
 mod tray;
 
 use tauri_plugin_autostart::MacosLauncher;
@@ -38,6 +39,8 @@ pub fn run() {
                 .register(shortcut)
                 .expect("failed to register F1 shortcut");
             tray::setup_tray(app.handle())?;
+            // One-time cleanup: remove the stale autostart entry from the pre-rename build.
+            migrate::cleanup_legacy_autostart();
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

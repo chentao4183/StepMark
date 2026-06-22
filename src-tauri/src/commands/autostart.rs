@@ -1,6 +1,6 @@
 use tauri_plugin_autostart::ManagerExt;
 
-/// Returns whether SnapNote is configured to launch at login.
+/// Returns whether StepMark is configured to launch at login.
 #[tauri::command]
 pub fn get_autostart(app: tauri::AppHandle) -> bool {
     app.autolaunch().is_enabled().unwrap_or(false)

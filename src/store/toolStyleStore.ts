@@ -9,7 +9,10 @@ import {
   type ToolStyleSettings,
 } from "../types/toolStyle";
 
-export const TOOL_STYLE_STORAGE_KEY = "snapnote.toolStyles.v1";
+export const TOOL_STYLE_STORAGE_KEY = "stepmark.toolStyles.v1";
+
+// Previous name (pre-rename). Kept only to migrate existing users once.
+const LEGACY_TOOL_STYLE_STORAGE_KEY = "snapnote.toolStyles.v1";
 
 interface ToolStyleState {
   settings: ToolStyleSettings;
@@ -19,6 +22,7 @@ interface ToolStyleState {
 
 export function loadToolStyleSettings(): ToolStyleSettings {
   try {
+    migrateLegacyKey();
     const raw = getStorage()?.getItem(TOOL_STYLE_STORAGE_KEY);
     if (!raw) return cloneDefaults();
     const parsed = JSON.parse(raw);
@@ -129,6 +133,25 @@ function persist(settings: ToolStyleSettings) {
     getStorage()?.setItem(TOOL_STYLE_STORAGE_KEY, JSON.stringify(settings));
   } catch (error) {
     console.warn("Failed to persist tool styles", error);
+  }
+}
+
+/**
+ * One-time migration from the pre-rename key (snapnote → stepmark).
+ * If the legacy key exists and the new key does not, copy it over and remove the legacy key.
+ */
+function migrateLegacyKey(): void {
+  const storage = getStorage();
+  if (!storage) return;
+  try {
+    const legacy = storage.getItem(LEGACY_TOOL_STYLE_STORAGE_KEY);
+    if (!legacy) return;
+    if (storage.getItem(TOOL_STYLE_STORAGE_KEY) == null) {
+      storage.setItem(TOOL_STYLE_STORAGE_KEY, legacy);
+    }
+    storage.removeItem(LEGACY_TOOL_STYLE_STORAGE_KEY);
+  } catch (error) {
+    console.warn("Failed to migrate legacy tool styles key", error);
   }
 }
 

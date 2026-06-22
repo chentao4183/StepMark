@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "SnapNote",
-  "version": "0.2.1",
-  "identifier": "com.snapnote.app",
+  "productName": "StepMark",
+  "version": "0.3.0",
+  "identifier": "com.stepmark.app",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,14 +13,14 @@
     "windows": [
       {
         "label": "main",
-        "title": "SnapNote",
+        "title": "StepMark",
         "width": 800,
         "height": 600,
         "visible": false
       },
       {
         "label": "selector",
-        "title": "SnapNote",
+        "title": "StepMark",
         "url": "selector.html",
         "width": 1920,
         "height": 1080,
@@ -34,7 +34,7 @@
       },
       {
         "label": "editor",
-        "title": "SnapNote Editor",
+        "title": "StepMark Editor",
         "url": "editor.html",
         "width": 1920,
         "height": 1080,

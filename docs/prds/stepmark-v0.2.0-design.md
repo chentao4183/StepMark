@@ -1,6 +1,6 @@
-# SnapNote V0.2.0 Design
+# StepMark V0.2.0 Design
 
-> Companion design document for `docs/prds/snapnote-v0.2.0-prd.md`.
+> Companion design document for `docs/prds/stepmark-v0.2.0-prd.md`.
 > PRD defines what V0.2.0 delivers. This file defines how the implementation should behave.
 
 ## 1. Design Goals
@@ -541,7 +541,7 @@ Run after implementation:
 6. Rectangle tool: create rectangle and ellipse with different colors and stroke widths.
 7. Arrow tool: create solid and dashed arrows with different arrow head sizes.
 8. Text tool: create text with changed font size and font family.
-9. Restart SnapNote and confirm style settings persist.
+9. Restart StepMark and confirm style settings persist.
 10. Export and confirm no selection handles or blue shadows appear in the output.
 
 ## 11. Implementation Order

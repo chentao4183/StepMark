@@ -1,6 +1,6 @@
 <div align="center">
 
-# SnapNote
+# StepMark
 
 **Windows 桌面截图批注工具 · 对标 [Snipaste](https://zh.snipaste.com/)**
 
@@ -13,7 +13,7 @@
 
 <!-- 把演示截图放到 docs/images/ 下，下面这几张就会自动渲染。文件名见 docs/images/.gitkeep -->
 
-![SnapNote 智能标注效果](docs/images/hero.png)
+![StepMark 智能标注效果](docs/images/hero.png)
 
 ## ✨ 特性
 
@@ -144,7 +144,7 @@
 
 三个窗口职责分明:**主窗口**(隐藏,承载托盘入口与未来的设置)、**截图选区窗口**(F1 触发时创建,确认后销毁)、**编辑器窗口**(选区确认后创建,导出 / Esc 后销毁)。日常截图流程不经过主窗口。
 
-> 完整设计见 [`docs/superpowers/specs/2026-06-17-snapnote-design.md`](docs/superpowers/specs/2026-06-17-snapnote-design.md)。
+> 完整设计见 [`docs/superpowers/specs/2026-06-17-stepmark-design.md`](docs/superpowers/specs/2026-06-17-stepmark-design.md)。
 
 ---
 
@@ -170,7 +170,7 @@ npm run tauri dev
 npm run tauri build
 ```
 
-> 打包产物位于 `src-tauri/target/release/bundle/`(NSIS 在 `nsis/`、MSI 在 `msi/`),裸 exe 在 `src-tauri/target/release/snapnote.exe`。
+> 打包产物位于 `src-tauri/target/release/bundle/`(NSIS 在 `nsis/`、MSI 在 `msi/`),裸 exe 在 `src-tauri/target/release/stepmark.exe`。
 
 ### 日常使用
 
@@ -186,7 +186,7 @@ npm run tauri build
 ## 📁 项目结构
 
 ```
-SnapNote/
+StepMark/
 ├── src/                       # 前端 (React + TS)
 │   ├── windows/               # 三个窗口根组件:Main / Selector / Editor
 │   ├── canvas/                # Konva 画布:Stage + layers/ + shapes/
@@ -217,19 +217,19 @@ SnapNote/
 - ✅ **V0.3.0**:自动序号标注(智能标注/矩形/箭头/文字)、全局递增、位置与样式自定义、持久化
 - 🚧 后续阶段:问题清单 `.md` 导出、AI 分析(识别 UI / 字段问题)
 
-实施计划见 [`docs/superpowers/plans/2026-06-17-snapnote-mvp.md`](docs/superpowers/plans/2026-06-17-snapnote-mvp.md)。
+实施计划见 [`docs/superpowers/plans/2026-06-17-stepmark-mvp.md`](docs/superpowers/plans/2026-06-17-stepmark-mvp.md)。
 
 ---
 
 ## 📦 下载
 
-前往 [Releases 页面](https://github.com/chentao4183/SnapNote/releases) 获取最新版本。
+前往 [Releases 页面](https://github.com/chentao4183/StepMark/releases) 获取最新版本。
 
 | 版本 | 说明 |
 |------|------|
-| [**v0.3.0**](https://github.com/chentao4183/SnapNote/releases/tag/v0.3.0)(最新) | 自动序号标注:智能标注/矩形/箭头/文字全局递增编号、位置与样式(形状/颜色/字号)可自定义 |
-| [v0.2.0](https://github.com/chentao4183/SnapNote/releases/tag/v0.2.0) | 每工具样式自定义、可调裁剪区、椭圆形状、智能标注优化 |
-| [v0.1.0](https://github.com/chentao4183/SnapNote/releases/tag/v0.1.0) | 首个 MVP 版本 |
+| [**v0.3.0**](https://github.com/chentao4183/StepMark/releases/tag/v0.3.0)(最新) | 自动序号标注:智能标注/矩形/箭头/文字全局递增编号、位置与样式(形状/颜色/字号)可自定义 |
+| [v0.2.0](https://github.com/chentao4183/StepMark/releases/tag/v0.2.0) | 每工具样式自定义、可调裁剪区、椭圆形状、智能标注优化 |
+| [v0.1.0](https://github.com/chentao4183/StepMark/releases/tag/v0.1.0) | 首个 MVP 版本 |
 
 每个 Release 提供:
 - **NSIS 安装包**(`*-setup.exe`)— 推荐,双击安装,自动处理依赖

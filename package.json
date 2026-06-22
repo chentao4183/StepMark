@@ -1,7 +1,7 @@
 {
-  "name": "snapnote",
+  "name": "stepmark",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,6 +20,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-konva": "^19.2.5",
+    "stepmark": "file:",
     "use-image": "^1.1.4",
     "zustand": "^5.0.14"
   },

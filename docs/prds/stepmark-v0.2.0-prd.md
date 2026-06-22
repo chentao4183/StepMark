@@ -1,4 +1,4 @@
-# SnapNote V0.2.0 - Product Requirements Document (PRD)
+# StepMark V0.2.0 - Product Requirements Document (PRD)
 
 ## Requirements Description
 
@@ -6,7 +6,7 @@
 
 - **Business Problem**: V0.1.0 has shipped, but the core annotation flow still has several visual and interaction issues that make the tool feel less polished than Snipaste. V0.2.0 should focus on fixing these defects and adding practical style customization.
 - **Target Users**: Windows users who create screenshot feedback for product review, implementation acceptance, and daily issue reporting.
-- **Value Proposition**: Make SnapNote's annotation output cleaner, make smart annotation feel more natural, and let users persist their preferred visual style across sessions.
+- **Value Proposition**: Make StepMark's annotation output cleaner, make smart annotation feel more natural, and let users persist their preferred visual style across sessions.
 
 ### Feature Overview
 
@@ -25,7 +25,7 @@
   - Excluded: AI analysis, issue-list markdown export, cloud sync, multi-profile style presets, and advanced shape libraries.
 - **User Scenarios**:
   - A user captures a region, notices the initial selection missed a few pixels, and drags an editor crop handle outward to include the missing screen area.
-  - A user prefers blue 5px arrows and larger text. They change the style once, close SnapNote, and the next screenshot uses the same settings.
+  - A user prefers blue 5px arrows and larger text. They change the style once, close StepMark, and the next screenshot uses the same settings.
   - A user creates a smart note with the arrow extending left from the target shape. The text input appears on the left side and grows leftward while typing.
 
 ### Detailed Requirements
@@ -55,7 +55,7 @@
 #### New Requirements
 
 1. **Persistent style settings**
-   - Style settings must be saved locally and restored after closing and reopening SnapNote.
+   - Style settings must be saved locally and restored after closing and reopening StepMark.
    - Settings are per tool where behavior differs by tool.
    - Defaults must remain compatible with V0.1.0: red `#ff4757`, 3px stroke, system font.
 

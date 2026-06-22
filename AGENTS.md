@@ -7,7 +7,7 @@
 
 ## 项目简介
 
-**SnapNote** —— Windows 桌面截图批注工具，对标 [Snipaste](https://zh.snipaste.com/)。
+**StepMark** —— Windows 桌面截图批注工具，对标 [Snipaste](https://zh.snipaste.com/)。
 
 核心差异化卖点：**「智能标注」工具** —— 用户在截图上拖一个框，一步生成「红框 + 箭头 + 文字标签」组合，不需要像传统工具那样分别切换矩形/箭头/文字工具。
 
@@ -31,11 +31,11 @@
 
 | 文档 | 内容 | 何时读 |
 |------|------|--------|
-| `docs/superpowers/specs/2026-06-17-snapnote-design.md` | V0.1 完整设计：架构、交互状态机、数据模型、验收标准 | 开始任何编码前 |
-| `docs/superpowers/plans/2026-06-17-snapnote-mvp.md` | V0.1 的 18 个 Task 逐步实施计划 | V0.1 已完成，参考用 |
-| `docs/superpowers/specs/2026-06-18-snapnote-v0.2.1-editor-enhancement.md` | **V0.2.1 设计**：坐标重构 + crop + bug + 缩放 + 椭圆 | 执行 V0.2.1 前 |
-| `docs/superpowers/specs/2026-06-18-snapnote-v0.2.2-tool-styles.md` | **V0.2.2 设计**：每工具样式 + 二级面板 + 持久化 | 执行 V0.2.2 前 |
-| `docs/prds/snapnote-v0.2.0-prd.md` | Codex 写的 V0.2 PRD（对照验证用，非权威实施依据） | 评审对照时读 |
+| `docs/superpowers/specs/2026-06-17-stepmark-design.md` | V0.1 完整设计：架构、交互状态机、数据模型、验收标准 | 开始任何编码前 |
+| `docs/superpowers/plans/2026-06-17-stepmark-mvp.md` | V0.1 的 18 个 Task 逐步实施计划 | V0.1 已完成，参考用 |
+| `docs/superpowers/specs/2026-06-18-stepmark-v0.2.1-editor-enhancement.md` | **V0.2.1 设计**：坐标重构 + crop + bug + 缩放 + 椭圆 | 执行 V0.2.1 前 |
+| `docs/superpowers/specs/2026-06-18-stepmark-v0.2.2-tool-styles.md` | **V0.2.2 设计**：每工具样式 + 二级面板 + 持久化 | 执行 V0.2.2 前 |
+| `docs/prds/stepmark-v0.2.0-prd.md` | Codex 写的 V0.2 PRD（对照验证用，非权威实施依据） | 评审对照时读 |
 
 **不要凭记忆/猜测实现**，所有交互细节、字段定义、视觉规格都在 spec 里。遇到分歧**以 superpowers/specs 为准**（PRD 是参考，spec 是实施依据）。
 
@@ -107,7 +107,7 @@ npm run build
 # 单元测试
 npm test
 
-# 打包成 exe（产出 src-tauri/target/release/SnapNote.exe 和 NSIS 安装包）
+# 打包成 exe（产出 src-tauri/target/release/StepMark.exe 和 NSIS 安装包）
 npm run tauri build
 ```
 
@@ -173,5 +173,5 @@ src-tauri/src/
 
 - **平台**：Windows 10 19045 x64
 - **Shell**：cmd.exe
-- **工作目录**：`D:\SnapNote`
+- **工作目录**：`D:\StepMark`
 - **非 git 子模块**，独立项目
