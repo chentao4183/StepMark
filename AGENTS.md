@@ -126,17 +126,32 @@ docs/
 
 **任何涉及代码修改的功能或优化，都必须先建功能分支，禁止直接在 master 工作树上堆改动。** 这是所有 AI Agent（Codex / Copilot / ZCode 等）新开会话时的第一条流程规则。
 
-流程（按顺序执行）:
+### 为什么用 worktree：一个仓库只有一份工作树
 
-1. **确认 master 干净**：`git checkout master && git status`。工作树必须 clean；若有残留改动，先提交或让用户确认后再继续。**禁止在脏的 master 上直接拉分支**，否则脏改动会污染新分支。
-2. **拉功能分支**：`git checkout -b feat/<功能名>`（修复用 `fix/`，重构用 `refactor/`，文档用 `docs/`）。分支名用英文、能体现功能。
-3. **小步提交**：改一次 commit 一次，一个 commit 只表达一件事。不要等全部做完才一次性提交。提交信息用英文，遵循 `type(scope): summary` 格式（如 `feat(smart): ...`、`refactor(numbering): ...`）。
-4. **合并前验证**：在功能分支上跑 `npm test` 和 `npm run build`，确认通过后再合并。涉及 Konva/React 渲染的改动还要做手动 smoke test。
-5. **合并回主线**：`git checkout master && git merge feat/<功能名>`，合并后删除功能分支 `git branch -d feat/<功能名>`。除非用户明确要求合到其它分线，否则一律合回 master。
+一个本地 git 仓库（`.git`）只有一份工作树和 HEAD 在磁盘上。**多个会话/终端在同一个目录（`D:\StepMark`）共用工作树时，任何一个会话的 `git checkout` 都会改写磁盘文件，污染其它会话的代码和编译产物**——这是典型踩坑：A 会话编译时，B 会话一个 checkout 就把 A 的改动覆盖了，A 还以为编译的是自己的代码。
 
-**为什么有这条规则**：多个 agent / 多次会话如果在同一条 master 工作树上叠加不同功能的改动，提交时就必须按 hunk 拆分文件，极易出错且难以隔离验证。功能分支让每个改动天然隔离，提交即 `git add -A && git commit`，验证时整条分支独立可测，合并后最终代码与直推 master 完全一致。
+git worktree 给每个会话一份独立的工作树（独立目录 + 独立 HEAD），多会话各在自己的目录里 checkout/编译/合并，互不干扰。因此：**多会话并行时必须用 worktree，禁止在主目录共用 checkout。**
 
-例外：纯只读的探查（看代码、查问题、回答问题）不需要建分支。一旦动手改文件，就按上面的流程走。
+### 流程（按顺序执行）
+
+0. **判定用不用 worktree**（建分支前先做）：`git worktree list` 查看现有 worktree，`git -C D:\StepMark branch --show-current` 看主目录挂在哪个分支。
+   - 若主目录 `D:\StepMark` **已被另一个会话占用**（挂在非 master 分支，或正在改/编译）→ **当前会话必须用 worktree**：`git worktree add ../StepMark-<功能名> -b <type>/<功能名>`，然后 `cd ../StepMark-<功能名>`，后续所有步骤在该目录内执行。
+   - 若主目录**空闲**（挂在 master 且 clean）→ 单会话可在主目录直接 checkout 分支，不强制 worktree（向后兼容）。
+   
+   下面的步骤里，凡标「worktree」的，仅 worktree 会话按括号说明执行；标「主目录」的，仅单会话按括号说明执行；未标注的步骤两种场景通用。
+
+1. **拉功能分支并进入**：分支名用英文、能体现功能（新功能 `feat/`，修复 `fix/`，重构 `refactor/`，文档 `docs/`）。
+   - 主目录：`git checkout master && git status`（必须 clean，**禁止在脏工作树上拉分支**）→ `git checkout -b <type>/<功能名>`。
+   - worktree：上一步 `git worktree add` 时已用 `-b` 建好分支并进入目录，无需再 checkout master；`git status` 确认 clean 即可。
+2. **小步提交**：改一次 commit 一次，一个 commit 只表达一件事。不要等全部做完才一次性提交。提交信息用英文，遵循 `type(scope): summary` 格式（如 `feat(smart): ...`、`refactor(numbering): ...`）。
+3. **自测验证**：在当前分支/worktree 目录上跑 `npm test` 和 `npm run build`，确认通过。涉及 Konva/React 渲染的改动还要做手动 smoke test。**编译产物（exe）前后各执行一次 `git branch --show-current` 并核对关键文件内容**，确认编译的就是本次改动，防止多会话竞态把代码切走。
+4. **等用户确认后再合并**：把分支名、改动摘要、待验证点告诉用户。**只有用户明确表示验证通过，才执行合并**。禁止自测通过就自行合并。涉及渲染的改动以用户的手动 smoke test 为准。
+5. **合并回主线**：在**主目录**执行 `git checkout master && git merge <type>/<功能名>`（worktree 会话先 `cd D:\StepMark` 回主目录；worktree 挂着 feature 分支，不能就地 checkout master）。除非用户明确要求合到其它分线，否则一律合回 master。
+6. **清理**：若用了 worktree，**先 `git worktree remove ../StepMark-<功能名>` 删独立目录，再 `git branch -d <type>/<功能名>` 删分支**。注意顺序：`git merge` 不会自动删 worktree 文件夹；worktree 未 remove 时该分支被它占用，`git branch -d` 会失败——所以必须先 remove worktree、再删分支。单会话（无 worktree）直接 `git branch -d` 即可。
+
+**例外**：纯只读的探查（看代码、查问题、回答问题）不需要建分支。一旦动手改文件，就按上面的流程走。
+
+**为什么有这条规则**：多个 agent / 多次会话如果在同一条 master 工作树上叠加不同功能的改动，提交时就必须按 hunk 拆分文件，极易出错且难以隔离验证。功能分支（多会话下用 worktree）让每个改动天然隔离，提交即 `git add -A && git commit`，验证时整条分支独立可测，合并后最终代码与直推 master 完全一致。
 
 ---
 
