@@ -1,3 +1,4 @@
+import { arrowHeadFromStroke } from "../geometry/arrowHead";
 import type { Annotation, AnnotationStyle, ToolType } from "../types/annotation";
 import type { ToolStyleSettings } from "../types/toolStyle";
 
@@ -30,7 +31,7 @@ export function annotationFieldsFromToolStyle(
       return {
         style: style(t.color, t.strokeWidth, t.color, t.color, 13),
         lineStyle: t.lineStyle,
-        arrowHeadSize: t.arrowHeadSize,
+        arrowHeadSize: arrowHeadFromStroke(t.strokeWidth),
       };
     }
     case "text": {

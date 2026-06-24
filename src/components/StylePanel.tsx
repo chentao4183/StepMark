@@ -131,13 +131,6 @@ export default function StylePanel({ tool, placement }: Props) {
               ]}
               onChange={(lineStyle) => updateTool("arrow", { lineStyle })}
             />
-            <NumberSlider
-              label="箭头"
-              value={settings.arrow.arrowHeadSize}
-              min={TOOL_STYLE_LIMITS.arrowHeadSize.min}
-              max={TOOL_STYLE_LIMITS.arrowHeadSize.max}
-              onChange={(arrowHeadSize) => updateTool("arrow", { arrowHeadSize })}
-            />
             <NumberingControls tool="arrow" mode="toggle" />
           </PanelRow>
           <NumberingControls tool="arrow" mode="details" />
