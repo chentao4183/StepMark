@@ -122,6 +122,24 @@ docs/
 
 ---
 
+## 分支与工作流（硬性规则）
+
+**任何涉及代码修改的功能或优化，都必须先建功能分支，禁止直接在 master 工作树上堆改动。** 这是所有 AI Agent（Codex / Copilot / ZCode 等）新开会话时的第一条流程规则。
+
+流程（按顺序执行）:
+
+1. **确认 master 干净**：`git checkout master && git status`。工作树必须 clean；若有残留改动，先提交或让用户确认后再继续。**禁止在脏的 master 上直接拉分支**，否则脏改动会污染新分支。
+2. **拉功能分支**：`git checkout -b feat/<功能名>`（修复用 `fix/`，重构用 `refactor/`，文档用 `docs/`）。分支名用英文、能体现功能。
+3. **小步提交**：改一次 commit 一次，一个 commit 只表达一件事。不要等全部做完才一次性提交。提交信息用英文，遵循 `type(scope): summary` 格式（如 `feat(smart): ...`、`refactor(numbering): ...`）。
+4. **合并前验证**：在功能分支上跑 `npm test` 和 `npm run build`，确认通过后再合并。涉及 Konva/React 渲染的改动还要做手动 smoke test。
+5. **合并回主线**：`git checkout master && git merge feat/<功能名>`，合并后删除功能分支 `git branch -d feat/<功能名>`。除非用户明确要求合到其它分线，否则一律合回 master。
+
+**为什么有这条规则**：多个 agent / 多次会话如果在同一条 master 工作树上叠加不同功能的改动，提交时就必须按 hunk 拆分文件，极易出错且难以隔离验证。功能分支让每个改动天然隔离，提交即 `git add -A && git commit`，验证时整条分支独立可测，合并后最终代码与直推 master 完全一致。
+
+例外：纯只读的探查（看代码、查问题、回答问题）不需要建分支。一旦动手改文件，就按上面的流程走。
+
+---
+
 ## 编码与提交约定
 
 - 代码注释和提交信息用英文。
