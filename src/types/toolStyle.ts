@@ -18,7 +18,6 @@ export interface ArrowToolStyle {
   color: string;
   strokeWidth: number;
   lineStyle: LineStyle;
-  arrowHeadSize: number;
 }
 
 export interface TextToolStyle {
@@ -51,7 +50,6 @@ export const DEFAULT_TOOL_STYLES: ToolStyleSettings = {
     color: "#ff4757",
     strokeWidth: 3,
     lineStyle: "solid",
-    arrowHeadSize: 17,
   },
   text: {
     color: "#ff4757",
@@ -63,5 +61,4 @@ export const DEFAULT_TOOL_STYLES: ToolStyleSettings = {
 export const TOOL_STYLE_LIMITS = {
   strokeWidth: { min: 1, max: 8 },
   fontSize: { min: 8, max: 72 },
-  arrowHeadSize: { min: 4, max: 20 },
 };

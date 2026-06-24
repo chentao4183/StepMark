@@ -3,6 +3,7 @@ import { Stage, Layer, Image as KonvaImage, Rect, Arrow, Ellipse } from "react-k
 import type Konva from "konva";
 import useImage from "use-image";
 import { useEditorStore } from "../store/editorStore";
+import { arrowHeadFromStroke } from "../geometry/arrowHead";
 import AnnotationLayer from "./layers/AnnotationLayer";
 import type { ActiveTool } from "../tools";
 import { setEditorStage } from "./exportCanvas";
@@ -95,8 +96,8 @@ export default function EditorStage({ active, onEditText }: Props) {
             stroke={active.arrow.style.color}
             strokeWidth={active.arrow.style.strokeWidth}
             fill={active.arrow.style.color}
-            pointerLength={active.arrow.style.arrowHeadSize}
-            pointerWidth={active.arrow.style.arrowHeadSize}
+            pointerLength={arrowHeadFromStroke(active.arrow.style.strokeWidth)}
+            pointerWidth={arrowHeadFromStroke(active.arrow.style.strokeWidth)}
             dash={active.arrow.style.lineStyle === "dashed" ? [10, 6] : undefined}
           />
         )}

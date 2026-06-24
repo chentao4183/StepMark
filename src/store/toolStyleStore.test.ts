@@ -27,7 +27,8 @@ describe("loadToolStyleSettings", () => {
     const settings = loadToolStyleSettings();
     expect(settings.smart).toEqual(DEFAULT_TOOL_STYLES.smart);
     expect(settings.rect).toEqual({ color: "#1890ff", strokeWidth: 4, shape: "ellipse" });
-    expect(settings.arrow).toEqual({ color: "#52c41a", strokeWidth: 2, lineStyle: "dashed", arrowHeadSize: 18 });
+    // arrowHeadSize is no longer a stored field; the legacy value is dropped.
+    expect(settings.arrow).toEqual({ color: "#52c41a", strokeWidth: 2, lineStyle: "dashed" });
     expect(settings.text).toEqual({ color: "#000000", fontSize: 20, fontFamily: "Arial" });
 
     Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });

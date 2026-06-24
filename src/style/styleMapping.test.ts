@@ -29,14 +29,14 @@ describe("annotationFieldsFromToolStyle", () => {
     expect(fields.shape).toBe("none");
   });
 
-  it("maps arrow line style and arrow head size", () => {
+  it("maps arrow line style and derives arrow head size from stroke width", () => {
     const fields = annotationFieldsFromToolStyle("arrow", {
       ...DEFAULT_TOOL_STYLES,
-      arrow: { color: "#52c41a", strokeWidth: 2, lineStyle: "dashed", arrowHeadSize: 16 },
+      arrow: { color: "#52c41a", strokeWidth: 2, lineStyle: "dashed" },
     });
 
     expect(fields.lineStyle).toBe("dashed");
-    expect(fields.arrowHeadSize).toBe(16);
+    expect(fields.arrowHeadSize).toBe(6);
     expect(fields.style.borderColor).toBe("#52c41a");
   });
 });

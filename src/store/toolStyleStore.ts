@@ -106,13 +106,6 @@ function validateArrow(value: unknown): ArrowToolStyle {
       ? value.strokeWidth
       : d.strokeWidth,
     lineStyle: value.lineStyle === "solid" || value.lineStyle === "dashed" ? value.lineStyle : d.lineStyle,
-    arrowHeadSize: validInt(
-      value.arrowHeadSize,
-      TOOL_STYLE_LIMITS.arrowHeadSize.min,
-      TOOL_STYLE_LIMITS.arrowHeadSize.max,
-    )
-      ? value.arrowHeadSize
-      : d.arrowHeadSize,
   };
 }
 
