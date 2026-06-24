@@ -77,7 +77,7 @@ function validateSmart(value: unknown): SmartToolStyle {
     strokeWidth: validInt(value.strokeWidth, TOOL_STYLE_LIMITS.strokeWidth.min, TOOL_STYLE_LIMITS.strokeWidth.max)
       ? value.strokeWidth
       : d.strokeWidth,
-    shape: value.shape === "rect" || value.shape === "ellipse" ? value.shape : d.shape,
+    shape: value.shape === "rect" || value.shape === "ellipse" || value.shape === "none" ? value.shape : d.shape,
     fontSize: validInt(value.fontSize, TOOL_STYLE_LIMITS.fontSize.min, TOOL_STYLE_LIMITS.fontSize.max)
       ? value.fontSize
       : d.fontSize,

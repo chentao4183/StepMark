@@ -1,9 +1,9 @@
-import type { LineStyle, ShapeKind } from "./annotation";
+import type { LineStyle, ShapeKind, SmartShapeKind } from "./annotation";
 
 export interface SmartToolStyle {
   color: string;
   strokeWidth: number;
-  shape: ShapeKind;
+  shape: SmartShapeKind;
   fontSize: number;
   fontFamily: string;
 }

@@ -70,13 +70,15 @@ export default function TextLabelShape({ a, selectable = false, onEditText }: Pr
       onDragEnd={(e) => {
         const { labelX: newLabelX, labelY: newLabelY } = resolveLabelAnchor(a, e.target.x(), e.target.y(), boxWidth, boxHeight);
         e.target.position({ x: boxX, y: boxY });
-        const nextStart = a.rect ? smartArrowStart(a.shape ?? "rect", a.rect, { x: newLabelX, y: newLabelY }) : null;
+        const nextStart = a.rect
+          ? smartArrowStart(a.shape === "ellipse" ? "ellipse" : "rect", a.rect, { x: newLabelX, y: newLabelY })
+          : null;
         update(a.id, {
           arrow: {
             ...a.arrow!,
             startCorner: a.rect ? undefined : a.arrow!.startCorner,
-            startX: nextStart?.x,
-            startY: nextStart?.y,
+            startX: nextStart ? nextStart.x : a.arrow!.startX,
+            startY: nextStart ? nextStart.y : a.arrow!.startY,
             endX: newLabelX,
             endY: newLabelY,
             labelX: newLabelX,
@@ -85,9 +87,6 @@ export default function TextLabelShape({ a, selectable = false, onEditText }: Pr
         });
       }}
     >
-      {a.type !== "text" && (
-        <Rect x={0} y={0} width={boxWidth} height={boxHeight} fill={a.style.bgColor} cornerRadius={4} />
-      )}
       {a.numberBadge && layout.badgeBox && <NumberBadgeShape badge={a.numberBadge} box={layout.badgeBox} />}
       <Text
         x={layout.textX}

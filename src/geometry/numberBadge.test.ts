@@ -283,16 +283,16 @@ describe("smartBadgeBox", () => {
     expect(out).toEqual(textBadgeBox(labelBox, box, "right", CROP));
   });
 
-  it("missing rect on anchor=target falls back to label-left", () => {
+  it("missing rect on anchor=target falls back to the configured label side", () => {
     const placement: SmartBadgePlacement = {
       anchor: "target",
       targetRectPosition: "top-left",
       targetEllipsePosition: "left",
       arrowPosition: "end",
-      labelPosition: "left",
+      labelPosition: "right",
     };
     const out = smartBadgeBox(annotation({ rect: undefined }), placement, labelBox, box, CROP);
-    expect(out).toEqual(textBadgeBox(labelBox, box, "left", CROP));
+    expect(out).toEqual(textBadgeBox(labelBox, box, "right", CROP));
   });
 
   it("missing arrow on anchor=arrow falls back to label-left", () => {

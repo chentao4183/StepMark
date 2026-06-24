@@ -2,6 +2,7 @@ export type ToolType = "select" | "smart" | "rect" | "arrow" | "text" | "mosaic"
 
 export type Corner = "tl" | "tr" | "bl" | "br";
 export type ShapeKind = "rect" | "ellipse";
+export type SmartShapeKind = ShapeKind | "none";
 export type LineStyle = "solid" | "dashed";
 
 export interface Rect {
@@ -58,7 +59,7 @@ export interface Annotation {
   id: string;
   type: ToolType;
   rect?: Rect;
-  shape?: ShapeKind;
+  shape?: SmartShapeKind;
   lineStyle?: LineStyle;
   arrowHeadSize?: number;
   fontFamily?: string;

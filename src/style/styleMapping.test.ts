@@ -20,6 +20,15 @@ describe("annotationFieldsFromToolStyle", () => {
     });
   });
 
+  it("maps smart styles without a target boundary", () => {
+    const fields = annotationFieldsFromToolStyle("smart", {
+      ...DEFAULT_TOOL_STYLES,
+      smart: { color: "#ff4757", strokeWidth: 3, shape: "none", fontSize: 17, fontFamily: "" },
+    });
+
+    expect(fields.shape).toBe("none");
+  });
+
   it("maps arrow line style and arrow head size", () => {
     const fields = annotationFieldsFromToolStyle("arrow", {
       ...DEFAULT_TOOL_STYLES,

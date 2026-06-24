@@ -225,7 +225,7 @@ export function smartBadgeBox(
 ): Rect | null {
   switch (placement.anchor) {
     case "target": {
-      if (!annotation.rect) return textBadgeBox(labelBox, badgeBox, "left", crop);
+      if (!annotation.rect) return textBadgeBox(labelBox, badgeBox, placement.labelPosition, crop);
       if (annotation.shape === "ellipse") {
         return ellipseBadgeBox(annotation.rect, badgeBox, placement.targetEllipsePosition, crop);
       }

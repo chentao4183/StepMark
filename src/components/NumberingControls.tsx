@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { useEditorStore } from "../store/editorStore";
 import { useNumberingStore } from "../store/numberingStore";
 import { useToolStyleStore } from "../store/toolStyleStore";
+import type { SmartShapeKind } from "../types/annotation";
 import { BADGE_FONT_SIZE_LIMITS } from "../types/numbering";
 import type {
   ArrowBadgePosition,
@@ -113,7 +114,7 @@ function SmartPositionControls({
     arrowPosition: ArrowBadgePosition;
     labelPosition: TextBadgePosition;
   };
-  shape: "rect" | "ellipse";
+  shape: SmartShapeKind;
   onChange: (patch: Partial<{
     anchor: SmartBadgeAnchor;
     targetRectPosition: RectBadgePosition;
@@ -134,6 +135,18 @@ function SmartPositionControls({
         onChange={(value) => onChange({ anchor: value })}
       />
       {placement.anchor === "target" &&
+        shape === "none" && (
+          <Segmented
+            value={placement.labelPosition}
+            options={[
+              { label: "左", value: "left" },
+              { label: "右", value: "right" },
+            ]}
+            onChange={(value) => onChange({ labelPosition: value })}
+          />
+        )}
+      {placement.anchor === "target" &&
+        shape !== "none" &&
         (shape === "ellipse" ? (
           <Segmented
             value={placement.targetEllipsePosition}

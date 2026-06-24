@@ -9,9 +9,9 @@ import { useNumberingStore } from "../store/numberingStore";
 import { useToolStyleStore } from "../store/toolStyleStore";
 import { useToolState } from "../store/toolState";
 import { annotationFieldsFromToolStyle } from "../style/styleMapping";
-import type { Annotation } from "../types/annotation";
+import type { Annotation, ShapeKind } from "../types/annotation";
 
-type Phase = "idle" | "drawing-rect" | "selecting-label-position" | "editing-label";
+type Phase = "idle" | "drawing-rect" | "drawing-arrow" | "selecting-label-position" | "editing-label";
 
 export function useSmartAnnotationTool() {
   const addAnnotation = useEditorStore((s) => s.addAnnotation);
@@ -36,12 +36,22 @@ export function useSmartAnnotationTool() {
       if (phaseRef.current !== "idle") return;
       const p = pos(e);
       dragStartRef.current = p;
+      if (style.shape === "none") {
+        ts.setSmart({ rect: null, previewRect: null, arrowStart: p, arrowEnd: p, textPos: null });
+        setPhase("drawing-arrow");
+        return;
+      }
       ts.setSmart({ previewRect: { x: p.x, y: p.y, width: 0, height: 0 } });
       setPhase("drawing-rect");
     },
     onMouseMove: (e: Konva.KonvaEventObject<MouseEvent>) => {
       const p = pos(e);
-      if (phaseRef.current === "drawing-rect" && dragStartRef.current) {
+      if (phaseRef.current === "drawing-arrow" && dragStartRef.current) {
+        ts.setSmart({
+          arrowStart: dragStartRef.current,
+          arrowEnd: p,
+        });
+      } else if (phaseRef.current === "drawing-rect" && dragStartRef.current) {
         const s = dragStartRef.current;
         ts.setSmart({
           previewRect: {
@@ -53,12 +63,36 @@ export function useSmartAnnotationTool() {
         });
       } else if (phaseRef.current === "selecting-label-position" && rectRef.current) {
         ts.setSmart({
-          arrowStart: smartArrowStart(style.shape, rectRef.current, p),
+          arrowStart: smartArrowStart(targetShape(), rectRef.current, p),
           arrowEnd: p,
         });
       }
     },
     onMouseUp: (e: Konva.KonvaEventObject<MouseEvent>) => {
+      if (phaseRef.current === "drawing-arrow") {
+        const start = dragStartRef.current;
+        const p = pos(e);
+        if (!start || Math.hypot(p.x - start.x, p.y - start.y) <= 5) {
+          reset();
+          return;
+        }
+
+        const numberingSettings = useNumberingStore.getState().settings;
+        const pendingNumberBadge =
+          numberingSettings.positionByTool.smart.anchor === "label"
+            ? pendingNumberBadgeForTool("smart", numberingSettings, useEditorStore.getState().nextNumber)
+            : null;
+        ts.setSmart({
+          rect: null,
+          previewRect: null,
+          arrowStart: start,
+          arrowEnd: p,
+          textPos: p,
+          pendingSmartNumberBadge: pendingNumberBadge,
+        });
+        setPhase("editing-label");
+        return;
+      }
       if (phaseRef.current !== "drawing-rect") return;
       const r = ts.previewRect;
       if (!r || r.width <= 5 || r.height <= 5) {
@@ -72,7 +106,7 @@ export function useSmartAnnotationTool() {
       ts.setSmart({
         previewRect: null,
         rect: r,
-        arrowStart: smartArrowStart(style.shape, r, p),
+        arrowStart: smartArrowStart(targetShape(), r, p),
         arrowEnd: p,
         textPos: null,
       });
@@ -92,7 +126,7 @@ export function useSmartAnnotationTool() {
           ? pendingNumberBadgeForTool("smart", numberingSettings, useEditorStore.getState().nextNumber)
           : null;
       ts.setSmart({
-        arrowStart: smartArrowStart(style.shape, rectRef.current, p),
+        arrowStart: smartArrowStart(targetShape(), rectRef.current, p),
         arrowEnd: p,
         textPos: p,
         pendingSmartNumberBadge: pendingNumberBadge,
@@ -107,13 +141,13 @@ export function useSmartAnnotationTool() {
     const arrowEnd = ts.arrowEnd;
     const labelAnchor = ts.textPos;
 
-    if (rect && arrowStart && arrowEnd && labelAnchor && text.trim()) {
+    if ((rect || style.shape === "none") && arrowStart && arrowEnd && labelAnchor && text.trim()) {
       const settings = useToolStyleStore.getState().settings;
       const fields = annotationFieldsFromToolStyle("smart", settings);
       const base: Annotation = {
         id: crypto.randomUUID(),
         type: "smart",
-        rect,
+        ...(rect ? { rect } : {}),
         ...fields,
         note: text,
         arrow: {
@@ -143,6 +177,10 @@ export function useSmartAnnotationTool() {
     rectRef.current = null;
     skipNextClickRef.current = false;
     ts.resetSmart();
+  }
+
+  function targetShape(): ShapeKind {
+    return style.shape === "ellipse" ? "ellipse" : "rect";
   }
 
   return {

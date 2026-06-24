@@ -6,7 +6,7 @@ import { useEditorStore } from "../store/editorStore";
 import AnnotationLayer from "./layers/AnnotationLayer";
 import type { ActiveTool } from "../tools";
 import { setEditorStage } from "./exportCanvas";
-import type { Annotation } from "../types/annotation";
+import type { Annotation, ShapeKind } from "../types/annotation";
 
 interface Props {
   active: ActiveTool;
@@ -53,10 +53,12 @@ export default function EditorStage({ active, onEditText }: Props) {
       <Layer listening={false} clipX={crop.x} clipY={crop.y} clipWidth={crop.width} clipHeight={crop.height}>
         {active.kind === "smart" &&
           active.smart.previewRect &&
+          active.smart.shape !== "none" &&
           renderBounds(active.smart.previewRect, active.smart.shape, active.smart.style.color, active.smart.style.strokeWidth)}
         {active.kind === "smart" &&
           !active.smart.previewRect &&
           active.smart.rect &&
+          active.smart.shape !== "none" &&
           renderBounds(active.smart.rect, active.smart.shape, active.smart.style.color, active.smart.style.strokeWidth)}
         {active.kind === "smart" && active.smart.arrowStart && active.smart.arrowEnd && (
           <Arrow
@@ -105,7 +107,7 @@ export default function EditorStage({ active, onEditText }: Props) {
 
 function renderBounds(
   rect: { x: number; y: number; width: number; height: number },
-  shape: "rect" | "ellipse",
+  shape: ShapeKind,
   color: string,
   strokeWidth: number,
 ) {

@@ -32,4 +32,28 @@ describe("loadToolStyleSettings", () => {
 
     Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });
   });
+
+  it("accepts none as a smart-only target shape", () => {
+    const original = globalThis.localStorage;
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: {
+        getItem: (key: string) =>
+          key === TOOL_STYLE_STORAGE_KEY
+            ? JSON.stringify({
+                smart: { color: "#ff4757", strokeWidth: 3, shape: "none", fontSize: 17, fontFamily: "" },
+                rect: { color: "#ff4757", strokeWidth: 3, shape: "none" },
+                arrow: DEFAULT_TOOL_STYLES.arrow,
+                text: DEFAULT_TOOL_STYLES.text,
+              })
+            : null,
+      },
+    });
+
+    const settings = loadToolStyleSettings();
+    expect(settings.smart.shape).toBe("none");
+    expect(settings.rect.shape).toBe(DEFAULT_TOOL_STYLES.rect.shape);
+
+    Object.defineProperty(globalThis, "localStorage", { configurable: true, value: original });
+  });
 });

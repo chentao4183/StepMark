@@ -71,6 +71,7 @@ export default function StylePanel({ tool, placement }: Props) {
               options={[
                 { label: "矩形", value: "rect" },
                 { label: "椭圆", value: "ellipse" },
+                { label: "无", value: "none" },
               ]}
               onChange={(shape) => updateTool("smart", { shape })}
             />
