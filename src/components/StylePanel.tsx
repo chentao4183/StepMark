@@ -7,8 +7,8 @@ import NumberingControls from "./NumberingControls";
 
 const PANEL_CONTROL_HEIGHT = 26;
 const PRESET_COLOR_ROWS = [
-  ["#000000", "#595959", "#ff4757", "#fa541c", "#fa8c16", "#faad14", "#52c41a", "#13c2c2", "#1890ff", "#722ed1"],
-  ["#ffffff", "#d9d9d9", "#ff7875", "#ff7a45", "#ffc069", "#ffd666", "#95de64", "#5cdbd3", "#69c0ff", "#b37feb"],
+  ["#ff4757", "#1890ff", "#52c41a", "#faad14"],
+  ["#722ed1", "#000000", "#ffffff", "#fa8c16"],
 ];
 const PRESET_COLORS = PRESET_COLOR_ROWS.flat();
 const CUSTOM_COLOR_FALLBACK = "#ff4757";
